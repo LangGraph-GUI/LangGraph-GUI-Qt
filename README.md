@@ -1,1 +1,1 @@
-# Frontend-ComfyUI
+# LangGraph-GUI
