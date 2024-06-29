@@ -24,22 +24,19 @@ class NodeData(Serializable):
     width: float = 200.0  # Default width
     height: float = 200.0  # Default height
 
-    name: str = ""
-
     # Agent
-    role: str = ""
-    goal: str = ""
-    backstory: str = ""
+    name: str = ""
+    description: str = ""
 
     # Task
-    agent: str = ""
-    description: str = ""
-    expected_output: str = ""
+    agent: str = ""    
 
     # Step
     tool: str = ""
-    arg: str = ""
     output_var: str = ""
+
+    # Tool
+    description: str = ""
 
 
     nexts: List[int] = field(default_factory=list)

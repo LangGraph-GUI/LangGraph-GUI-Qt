@@ -57,7 +57,7 @@ class NodeLayout(QGraphicsItem):
         self.type_layout = QHBoxLayout()
         self.type_label = QLabel("Type:")
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["None", "Start", "Agent", "Task", "Step", "Team"])
+        self.type_combo.addItems(["None", "Start", "Agent", "Task", "Step", "Team", "Tool"])
         self.type_combo.setCurrentText(self.parent.data.type)
         self.type_layout.addWidget(self.type_label)
         self.type_layout.addWidget(self.type_combo)
@@ -68,19 +68,14 @@ class NodeLayout(QGraphicsItem):
         self.slots = {}
         self.add_slot("name", QLineEdit)
 
+        self.add_slot("tool", QTextEdit)
         # Agent
-        self.add_slot("role", QTextEdit)
-        self.add_slot("goal", QTextEdit)
-        self.add_slot("backstory", QTextEdit)
-        
+
         # Task
         self.add_slot("agent", QTextEdit)
         self.add_slot("description", QTextEdit)
-        self.add_slot("expected_output", QTextEdit)
         
         # Step
-        self.add_slot("tool", QTextEdit)
-        self.add_slot("arg", QTextEdit)
         self.add_slot("output_var", QTextEdit)
         
         self.proxy_widget = QGraphicsProxyWidget(self)
@@ -128,16 +123,16 @@ class NodeLayout(QGraphicsItem):
             self.slots["name"].show()
         elif node_type == "Agent":
             self.slots["name"].show()
-            self.slots["role"].show()
-            self.slots["goal"].show()
-            self.slots["backstory"].show()
+            self.slots["description"].show()
+        elif node_type == "Tool":
+            self.slots["name"].show()
+            self.slots["description"].show()
         elif node_type == "Task":
             self.slots["agent"].show()
             self.slots["description"].show()
-            self.slots["expected_output"].show()
         elif node_type == "Step":
             self.slots["tool"].show()
-            self.slots["arg"].show()
+            self.slots["description"].show()
             self.slots["output_var"].show()
 
 
