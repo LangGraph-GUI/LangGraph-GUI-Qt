@@ -36,7 +36,6 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 
     # Define the state machine
     workflow = StateGraph(PipelineState)
-    app = workflow.compile()
 
     # Start node
     start_node = find_node_by_type(node_map, "START")
@@ -45,18 +44,23 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     # Step nodes
     step_nodes = find_nodes_by_type(node_map, "STEP")
     for current_node in step_nodes:
-        print(f"Processing task_node ID: {current_node.uniq_id}")
-
+        workflow.add_node(current_node.uniq_id, lambda state: print(f"Processing task_node ID: {current_node.uniq_id}"))
 
     # edges
-
-
+    # Find all next nodes from start_node
+    next_node_ids = start_node.nexts
+    next_nodes = [node_map[next_id] for next_id in next_node_ids]
+    
+    for next_node in next_nodes:
+        print(f"Next node ID: {next_node.uniq_id}, Type: {next_node.type}")
+        workflow.add_edge(START, next_node.uniq_id)   
 
 
     initial_state = PipelineState(
         history=""
     )
 
+    app = workflow.compile()
     for state in app.stream(initial_state):
         print(state)
 
