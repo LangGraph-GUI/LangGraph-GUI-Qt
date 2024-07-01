@@ -40,12 +40,12 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     # Step nodes
     step_nodes = find_nodes_by_type(node_map, "STEP")
     for current_node in step_nodes:
-        workflow.add_node(current_node.uniq_id, lambda state: print(f"Processing step_node: {current_node.name} {current_node.uniq_id}"))
-
+        workflow.add_node(
+            current_node.uniq_id, 
+            lambda state, name=current_node.name, uniq_id=current_node.uniq_id: print(f"Processing step_node: {name} {uniq_id}")
+        )
 
     # Condition nodes
-
-
 
     # edges
     # Find all next nodes from start_node
