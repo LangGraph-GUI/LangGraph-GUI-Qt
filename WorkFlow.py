@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Dict, List, TypedDict, Any
+from typing import Dict, List, TypedDict, Annotated
 import operator
 from NodeData import NodeData
 from langchain_community.chat_models import ChatOllama
@@ -31,8 +31,9 @@ def clip_history(history: str, max_chars: int = 8000) -> str:
     return history
 
 class PipelineState(TypedDict):
-    history: str
-    roll_number: int
+    history: Annotated[str, operator.add]
+    task: Annotated[str, operator.add]
+
 
 def execute_task(state: PipelineState, prompt_template: str) -> PipelineState:
     state["history"] = clip_history(state["history"])

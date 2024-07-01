@@ -3,32 +3,33 @@
         {
             "type": "STEP",
             "uniq_id": "uniq_id_10",
-            "pos_x": 604.0,
-            "pos_y": -962.0,
+            "pos_x": 664.0,
+            "pos_y": -528.0,
             "width": 260.0,
             "height": 376.0,
             "name": "Step2",
-            "description": "",
+            "description": "Here is the scenario: {history} As a Player, I want to perform an action. (in short, we do fast play) Output the JSON in the format: {{\"action\": \"palyer: I want xxxx\"}}",
             "team": "",
             "agent": "",
             "tool": "WriteFile",
             "task": "Play TRPG",
             "output_var": "",
-            "nexts": [],
+            "nexts": [
+                "uniq_id_7"
+            ],
             "prevs": [
-                "uniq_id_1",
                 "uniq_id_7"
             ]
         },
         {
             "type": "STEP",
             "uniq_id": "uniq_id_7",
-            "pos_x": 240.0,
-            "pos_y": -661.0,
-            "width": 236.0,
-            "height": 355.0,
+            "pos_x": 261.0,
+            "pos_y": -805.0,
+            "width": 336.0,
+            "height": 428.0,
             "name": "Step1",
-            "description": "",
+            "description": "{history} As DnD DM, describe the current scenario for the player. (in short, we do fast play) sometimes roll dice, sometimes not. player roll {roll_number}, if > 0 you need explain what the roll affect result, start from your roll {roll_number} blablabla Output the JSON in the format: {{\"scenario\": \"DM: your action description\", \"need_roll\": True/False}}",
             "team": "",
             "agent": "",
             "tool": "ReadFile",
@@ -38,6 +39,7 @@
                 "uniq_id_10"
             ],
             "prevs": [
+                "uniq_id_10",
                 "uniq_id_1"
             ]
         },
@@ -92,8 +94,8 @@
             "task": "",
             "output_var": "",
             "nexts": [
-                "uniq_id_5",
-                "uniq_id_2"
+                "uniq_id_2",
+                "uniq_id_5"
             ],
             "prevs": []
         },
@@ -131,7 +133,6 @@
             "task": "",
             "output_var": "",
             "nexts": [
-                "uniq_id_10",
                 "uniq_id_7"
             ],
             "prevs": []
