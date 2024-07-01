@@ -2,10 +2,11 @@
 
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 from PySide6.QtCore import QRectF, Qt, QPointF
-from PySide6.QtGui import QPainter, QPen, QBrush
+from PySide6.QtGui import QPainter, QPen, QBrush, QPainterPath  # Add QPainterPath here
 from Edge import Edge
 from NodeData import NodeData
 from NodeLayout import NodeLayout
+
 
 class Node(QGraphicsItem):
     def __init__(self, node_data: NodeData):
@@ -119,12 +120,29 @@ class Node(QGraphicsItem):
 
 class Port(QGraphicsEllipseItem):
     def __init__(self, parent, position, port_type):
-        super().__init__(-5, -5, 10, 10, parent)
-        self.setBrush(Qt.black)
+        super().__init__(parent)
         self.setFlag(QGraphicsItem.ItemIsMovable, False)
         self.setPos(position)
         self.port_type = port_type
         self.edges = []
+        self.setRect(self.boundingRect())  # Set the bounding rectangle for the port
+
+    def boundingRect(self):
+        return QRectF(-5, -5, 10, 10)
+
+    def paint(self, painter, option, widget):
+        painter.setBrush(Qt.black)
+        painter.setPen(Qt.NoPen)
+        
+        # Define the triangle shape
+        path = QPainterPath()
+        path.moveTo(-5, -5)
+        path.lineTo(5, 0)
+        path.lineTo(-5, 5)
+        path.closeSubpath()
+
+
+        painter.drawPath(path)
 
     def mousePressEvent(self, event):
         if self.port_type == "output":
