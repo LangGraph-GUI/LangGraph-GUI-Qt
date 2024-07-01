@@ -57,7 +57,7 @@ class NodeLayout(QGraphicsItem):
         self.type_layout = QHBoxLayout()
         self.type_label = QLabel("Type:")
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["None", "Start", "Agent", "Task", "Step", "Team", "Tool"])
+        self.type_combo.addItems(["NONE", "START", "AGENT", "TASK", "STEP", "TEAM", "TOOL"])
         self.type_combo.setCurrentText(self.parent.data.type)
         self.type_layout.addWidget(self.type_label)
         self.type_layout.addWidget(self.type_combo)
@@ -119,21 +119,21 @@ class NodeLayout(QGraphicsItem):
         for slot in self.slots.values():
             slot.hide()
 
-        if node_type in ["Start", "None"]:
+        if node_type in ["START", "NONE"]:
             pass
-        elif node_type == "Team":
+        elif node_type == "TEAM":
             self.slots["name"].show()
-        elif node_type == "Agent":
-            self.slots["name"].show()
-            self.slots["description"].show()
-        elif node_type == "Tool":
+        elif node_type == "AGENT":
             self.slots["name"].show()
             self.slots["description"].show()
-        elif node_type == "Task":
+        elif node_type == "TOOL":
+            self.slots["name"].show()
+            self.slots["description"].show()
+        elif node_type == "TASK":
             self.slots["name"].show()
             self.slots["team"].show()
             self.slots["description"].show()
-        elif node_type == "Step":
+        elif node_type == "STEP":
             self.slots["tool"].show()
             self.slots["task"].show()
             self.slots["description"].show()

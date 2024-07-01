@@ -15,7 +15,7 @@ class Serializable:
 @dataclass
 class NodeData(Serializable):
     
-    # "None", "Start", "Agent", "Task", "Step", "Team"
+    # "NONE", "START", "AGENT", "TASK", "STEP", "TEAM"
     type: str = ""
 
     uniq_id: str = ""
@@ -24,14 +24,14 @@ class NodeData(Serializable):
     width: float = 200.0  # Default width
     height: float = 200.0  # Default height
 
-    # Agent
+    # AGENT
     name: str = ""
     description: str = ""
 
-    # Task
+    # TASK
     team: str = ""
 
-    # Step
+    # STEP
     agent: str = ""    
     tool: str = ""
     task: str = ""

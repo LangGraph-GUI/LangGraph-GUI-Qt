@@ -40,11 +40,19 @@ def RunWorkFlow(node: NodeData, node_map: Dict[str, NodeData], llm):
     app = workflow.compile()
 
 
-    workflow.add_node(START)
-
-    workflow.add_edge('Start', END)
-
-
+    # from root find step
+    sub_node_map = {next_id: node_map[next_id] for next_id in node.nexts}
+    # Use BFS to collect all task nodes
+    task_nodes = []
+    queue = find_nodes_by_type(sub_node_map, "STEP")
+    
+    while queue:
+        current_node = queue.pop(0)
+        if current_node not in task_nodes:
+            print(f"Processing task_node ID: {current_node.uniq_id}")
+            task_nodes.append(current_node)
+            next_sub_node_map = {next_id: node_map[next_id] for next_id in current_node.nexts}
+            queue.extend(find_nodes_by_type(next_sub_node_map, "STEP"))
 
 
 
@@ -62,6 +70,6 @@ def RunWorkFlow(node: NodeData, node_map: Dict[str, NodeData], llm):
 
 def run_workflow_from_file(filename: str, llm):
     node_map = load_nodes_from_json(filename)
-    start_nodes = find_nodes_by_type(node_map, "Start")
+    start_nodes = find_nodes_by_type(node_map, "START")
     for start_node in start_nodes:
         RunWorkFlow(start_node, node_map, llm)
