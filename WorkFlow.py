@@ -1,12 +1,34 @@
 import os
 import json
-from typing import Dict, List, TypedDict, Annotated
+from typing import Dict, List, TypedDict, Any, Annotated, Callable
 import operator
+import inspect
 from NodeData import NodeData
 from langchain_community.chat_models import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langgraph.graph import StateGraph, END, START
+
+# Tool registry to hold information about tools
+tool_registry: Dict[str, Callable] = {}
+tool_info_registry: List[Dict[str, Any]] = []
+
+# Decorator to register tools
+def tool(func: Callable) -> Callable:
+    signature = inspect.signature(func)
+    docstring = func.__doc__ or ""
+    params = [
+        {"name": param.name, "type": param.annotation}
+        for param in signature.parameters.values()
+    ]
+    tool_info = {
+        "name": func.__name__,
+        "description": docstring,
+        "parameters": params
+    }
+    tool_registry[func.__name__] = func
+    tool_info_registry.append(tool_info)
+    return func
 
 # Load local language model
 local_llm = "mistral"
@@ -95,5 +117,13 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 
 def run_workflow_from_file(filename: str, llm):
     node_map = load_nodes_from_json(filename)
+
+    tool_nodes = find_nodes_by_type(node_map, "TOOL")
+    for tool in tool_nodes:
+        tool_code = f"@tool\n{tool.description}"
+        # Register the tool function dynamically
+        exec(tool_code, globals())
+
+
     RunWorkFlow(node_map, llm)
 

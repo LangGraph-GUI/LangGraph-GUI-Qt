@@ -1,58 +1,15 @@
 {
     "nodes": [
         {
-            "type": "STEP",
-            "uniq_id": "uniq_id_10",
-            "pos_x": 664.0,
-            "pos_y": -528.0,
-            "width": 260.0,
-            "height": 376.0,
-            "name": "Step2",
-            "description": "Here is the scenario: {history} As a Player, I want to perform an action. (in short, we do fast play) Output the JSON in the format: {{\"action\": \"palyer: I want xxxx\"}}",
+            "type": "TOOL",
+            "uniq_id": "uniq_id_9",
+            "pos_x": -222.0,
+            "pos_y": -1178.0,
+            "width": 280.0,
+            "height": 283.0,
+            "name": "RollDice",
+            "description": "def RollDice(state: PipelineState) -> PipelineState:\n    \"\"\"\n    :function: RollDice\n    :param PipelineState state: The current state of the game\n    :return: Updated state after rolling a dice\n    \"\"\"\n    random_number = random.randint(1, 20)\n    state[\"history\"] += f\"\\nroll result: {random_number}\"\n    state[\"history\"] = clip_history(state[\"history\"])\n    state[\"need_roll\"] = False\n    state[\"roll_number\"] = random_number\n    return state",
             "team": "",
-            "agent": "",
-            "tool": "WriteFile",
-            "task": "Play TRPG",
-            "output_var": "",
-            "nexts": [
-                "uniq_id_7"
-            ],
-            "prevs": [
-                "uniq_id_7"
-            ]
-        },
-        {
-            "type": "STEP",
-            "uniq_id": "uniq_id_7",
-            "pos_x": 261.0,
-            "pos_y": -805.0,
-            "width": 336.0,
-            "height": 428.0,
-            "name": "Step1",
-            "description": "{history} As DnD DM, describe the current scenario for the player. (in short, we do fast play) sometimes roll dice, sometimes not. player roll {roll_number}, if > 0 you need explain what the roll affect result, start from your roll {roll_number} blablabla Output the JSON in the format: {{\"scenario\": \"DM: your action description\", \"need_roll\": True/False}}",
-            "team": "",
-            "agent": "",
-            "tool": "ReadFile",
-            "task": "Play TRPG",
-            "output_var": "",
-            "nexts": [
-                "uniq_id_10"
-            ],
-            "prevs": [
-                "uniq_id_10",
-                "uniq_id_1"
-            ]
-        },
-        {
-            "type": "TASK",
-            "uniq_id": "uniq_id_6",
-            "pos_x": -479.0,
-            "pos_y": -731.0,
-            "width": 234.0,
-            "height": 247.0,
-            "name": "Play TRPG",
-            "description": "",
-            "team": "DnD TRPG",
             "agent": "",
             "tool": "",
             "task": "",
@@ -61,14 +18,33 @@
             "prevs": []
         },
         {
+            "type": "START",
+            "uniq_id": "uniq_id_1",
+            "pos_x": -104.0,
+            "pos_y": -817.0,
+            "width": 200.0,
+            "height": 200.0,
+            "name": "Node",
+            "description": "",
+            "team": "",
+            "agent": "",
+            "tool": "",
+            "task": "",
+            "output_var": "",
+            "nexts": [
+                "uniq_id_7"
+            ],
+            "prevs": []
+        },
+        {
             "type": "AGENT",
-            "uniq_id": "uniq_id_5",
-            "pos_x": -370.0,
-            "pos_y": -48.0,
-            "width": 281.0,
-            "height": 252.0,
-            "name": "DM",
-            "description": "            {history}\n            As DnD DM, describe the current scenario for the player. (in short, we do fast play)\n            sometimes roll dice, sometimes not.            \n            player roll {roll_number}, if > 0 you need explain what the roll affect result, start from your roll {roll_number} blablabla\n            Output the JSON in the format: {{\"scenario\": \"your action description\", \"need_roll\": True/False}}\n",
+            "uniq_id": "uniq_id_2",
+            "pos_x": 61.0,
+            "pos_y": -99.0,
+            "width": 297.0,
+            "height": 275.0,
+            "name": "Player",
+            "description": "            Here is the scenario: {history}\n            As a Player, I want to perform an action. (in short, we do fast play)\n            Output the JSON in the format: {{\"action\": \"I want xxxx\"}}",
             "team": "",
             "agent": "",
             "tool": "",
@@ -101,13 +77,13 @@
         },
         {
             "type": "AGENT",
-            "uniq_id": "uniq_id_2",
-            "pos_x": 61.0,
-            "pos_y": -99.0,
-            "width": 297.0,
-            "height": 275.0,
-            "name": "Player",
-            "description": "            Here is the scenario: {history}\n            As a Player, I want to perform an action. (in short, we do fast play)\n            Output the JSON in the format: {{\"action\": \"I want xxxx\"}}",
+            "uniq_id": "uniq_id_5",
+            "pos_x": -370.0,
+            "pos_y": -48.0,
+            "width": 281.0,
+            "height": 252.0,
+            "name": "DM",
+            "description": "            {history}\n            As DnD DM, describe the current scenario for the player. (in short, we do fast play)\n            sometimes roll dice, sometimes not.            \n            player roll {roll_number}, if > 0 you need explain what the roll affect result, start from your roll {roll_number} blablabla\n            Output the JSON in the format: {{\"scenario\": \"your action description\", \"need_roll\": True/False}}\n",
             "team": "",
             "agent": "",
             "tool": "",
@@ -119,57 +95,64 @@
             ]
         },
         {
-            "type": "START",
-            "uniq_id": "uniq_id_1",
-            "pos_x": -104.0,
-            "pos_y": -817.0,
-            "width": 200.0,
-            "height": 200.0,
-            "name": "Node",
+            "type": "TASK",
+            "uniq_id": "uniq_id_6",
+            "pos_x": -479.0,
+            "pos_y": -731.0,
+            "width": 234.0,
+            "height": 247.0,
+            "name": "Play TRPG",
             "description": "",
-            "team": "",
+            "team": "DnD TRPG",
             "agent": "",
             "tool": "",
             "task": "",
+            "output_var": "",
+            "nexts": [],
+            "prevs": []
+        },
+        {
+            "type": "STEP",
+            "uniq_id": "uniq_id_7",
+            "pos_x": 261.0,
+            "pos_y": -805.0,
+            "width": 336.0,
+            "height": 428.0,
+            "name": "Step1",
+            "description": "{history} As DnD DM, describe the current scenario for the player. (in short, we do fast play) sometimes roll dice, sometimes not. player roll {roll_number}, if > 0 you need explain what the roll affect result, start from your roll {roll_number} blablabla Output the JSON in the format: {{\"scenario\": \"DM: your action description\", \"need_roll\": True/False}}",
+            "team": "",
+            "agent": "",
+            "tool": "ReadFile",
+            "task": "Play TRPG",
+            "output_var": "",
+            "nexts": [
+                "uniq_id_10"
+            ],
+            "prevs": [
+                "uniq_id_10",
+                "uniq_id_1"
+            ]
+        },
+        {
+            "type": "STEP",
+            "uniq_id": "uniq_id_10",
+            "pos_x": 664.0,
+            "pos_y": -528.0,
+            "width": 260.0,
+            "height": 376.0,
+            "name": "Step2",
+            "description": "Here is the scenario: {history} As a Player, I want to perform an action. (in short, we do fast play) Output the JSON in the format: {{\"action\": \"palyer: I want xxxx\"}}",
+            "team": "",
+            "agent": "",
+            "tool": "WriteFile",
+            "task": "Play TRPG",
             "output_var": "",
             "nexts": [
                 "uniq_id_7"
             ],
-            "prevs": []
-        },
-        {
-            "type": "TOOL",
-            "uniq_id": "uniq_id_8",
-            "pos_x": -614.0,
-            "pos_y": -1175.0,
-            "width": 296.0,
-            "height": 287.0,
-            "name": "ReadFile",
-            "description": "",
-            "team": "",
-            "agent": "",
-            "tool": "",
-            "task": "",
-            "output_var": "",
-            "nexts": [],
-            "prevs": []
-        },
-        {
-            "type": "TOOL",
-            "uniq_id": "uniq_id_9",
-            "pos_x": -222.0,
-            "pos_y": -1178.0,
-            "width": 280.0,
-            "height": 283.0,
-            "name": "WriteFile",
-            "description": "",
-            "team": "",
-            "agent": "",
-            "tool": "",
-            "task": "",
-            "output_var": "",
-            "nexts": [],
-            "prevs": []
+            "prevs": [
+                "uniq_id_7"
+            ]
         }
     ],
     "node_counter": 11

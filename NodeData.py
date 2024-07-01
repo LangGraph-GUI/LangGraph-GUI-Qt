@@ -15,7 +15,7 @@ class Serializable:
 @dataclass
 class NodeData(Serializable):
     
-    # "START", "AGENT", "TASK", "STEP", "TEAM"
+    # "START", "AGENT", "TASK", "STEP", "TEAM", "TOOL"
     type: str = ""
 
     uniq_id: str = ""
@@ -36,9 +36,6 @@ class NodeData(Serializable):
     tool: str = ""
     task: str = ""
     output_var: str = ""
-
-    # Tool
-    description: str = ""
 
 
     nexts: List[int] = field(default_factory=list)
