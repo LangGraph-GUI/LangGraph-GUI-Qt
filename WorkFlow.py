@@ -3,7 +3,8 @@
 import os
 import json
 import configparser
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Annotated
+import operator
 from NodeData import NodeData
 from langchain_community.llms import Ollama
 
@@ -22,29 +23,29 @@ def load_nodes_from_json(filename: str) -> Dict[str, NodeData]:
 def find_nodes_by_type(node_map: Dict[str, NodeData], node_type: str) -> List[NodeData]:
     return [node for node in node_map.values() if node.type == node_type]
 
-def find_node_by_type(node_map: Dict[str, NodeData], node_type: str) -> NodeData:
-    for node in node_map.values():
-        if node.type == node_type:
-            return node
-    return None
 
 def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 
     class PipelineState(TypedDict):
-        history: str
-        task: str
+        history: Annotated[str, operator.add]
+        task: Annotated[str, operator.add]
 
     # Define the state machine
     workflow = StateGraph(PipelineState)
 
-    # Start node
-    start_node = find_node_by_type(node_map, "START")
+    # Start node, only one start point
+    start_node = find_nodes_by_type(node_map, "START")[0]
     print(f"Start root ID: {start_node.uniq_id}")
 
     # Step nodes
     step_nodes = find_nodes_by_type(node_map, "STEP")
     for current_node in step_nodes:
-        workflow.add_node(current_node.uniq_id, lambda state: print(f"Processing task_node ID: {current_node.uniq_id}"))
+        workflow.add_node(current_node.uniq_id, lambda state: print(f"Processing step_node: {current_node.name} {current_node.uniq_id}"))
+
+
+    # Condition nodes
+
+
 
     # edges
     # Find all next nodes from start_node
@@ -56,14 +57,23 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         workflow.add_edge(START, next_node.uniq_id)   
 
 
+    # Find all next nodes from step_nodes
+    for node in step_nodes:
+        next_nodes = [node_map[next_id] for next_id in node.nexts]
+        
+        for next_node in next_nodes:
+            print(f"{node.name} {node.uniq_id}'s next node: {next_node.name} {next_node.uniq_id}, Type: {next_node.type}")
+            workflow.add_edge(node.uniq_id, next_node.uniq_id)   
+
+
     initial_state = PipelineState(
-        history=""
+        history="",
+        task=""
     )
 
     app = workflow.compile()
     for state in app.stream(initial_state):
         print(state)
-
 
 
 def run_workflow_from_file(filename: str, llm):

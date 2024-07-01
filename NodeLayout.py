@@ -134,6 +134,7 @@ class NodeLayout(QGraphicsItem):
             self.slots["team"].show()
             self.slots["description"].show()
         elif node_type == "STEP":
+            self.slots["name"].show()
             self.slots["tool"].show()
             self.slots["task"].show()
             self.slots["description"].show()
