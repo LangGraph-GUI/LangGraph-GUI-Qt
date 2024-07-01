@@ -29,10 +29,12 @@ class NodeData(Serializable):
     description: str = ""
 
     # Task
-    agent: str = ""    
+    team: str = ""
 
     # Step
+    agent: str = ""    
     tool: str = ""
+    task: str = ""
     output_var: str = ""
 
     # Tool

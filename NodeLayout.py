@@ -67,16 +67,18 @@ class NodeLayout(QGraphicsItem):
         # Initialize slots
         self.slots = {}
         self.add_slot("name", QLineEdit)
+        self.add_slot("tool", QLineEdit)
 
-        self.add_slot("tool", QTextEdit)
         # Agent
 
         # Task
-        self.add_slot("agent", QTextEdit)
-        self.add_slot("description", QTextEdit)
-        
+        self.add_slot("team", QLineEdit)
+
         # Step
-        self.add_slot("output_var", QTextEdit)
+        self.add_slot("agent", QLineEdit)
+        self.add_slot("task", QLineEdit)
+        self.add_slot("description", QTextEdit)
+        self.add_slot("output_var", QLineEdit)
         
         self.proxy_widget = QGraphicsProxyWidget(self)
         self.proxy_widget.setWidget(self.container_widget)
@@ -128,10 +130,12 @@ class NodeLayout(QGraphicsItem):
             self.slots["name"].show()
             self.slots["description"].show()
         elif node_type == "Task":
-            self.slots["agent"].show()
+            self.slots["name"].show()
+            self.slots["team"].show()
             self.slots["description"].show()
         elif node_type == "Step":
             self.slots["tool"].show()
+            self.slots["task"].show()
             self.slots["description"].show()
             self.slots["output_var"].show()
 
