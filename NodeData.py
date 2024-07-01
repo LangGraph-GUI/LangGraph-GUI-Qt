@@ -15,7 +15,7 @@ class Serializable:
 @dataclass
 class NodeData(Serializable):
     
-    # "NONE", "START", "AGENT", "TASK", "STEP", "TEAM"
+    # "START", "AGENT", "TASK", "STEP", "TEAM"
     type: str = ""
 
     uniq_id: str = ""
@@ -32,7 +32,7 @@ class NodeData(Serializable):
     team: str = ""
 
     # STEP
-    agent: str = ""    
+    agent: str = ""
     tool: str = ""
     task: str = ""
     output_var: str = ""
