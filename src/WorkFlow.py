@@ -141,7 +141,9 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     for current_node in step_nodes:
         if current_node.tool:
             tool_description = tool_map[current_node.tool]
-            prompt_template = f"""{current_node.description}
+            prompt_template = f"""
+            history: {{history}}
+            {current_node.description}
             Available tool: {tool_description}
             Based on the history, choose the appropriate tool and arguments in the json format:
             "function": "<function>", "args": [<arg1>, <arg2>, ...]
@@ -153,9 +155,13 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
                 lambda state, template=prompt_template: execute_tool(state, template)
             )
         else:
+            prompt_template=f"""
+            history: {{history}}
+            {current_node.description}
+            """
             workflow.add_node(
                 current_node.uniq_id, 
-                lambda state, template=current_node.description: execute_task(state, template)
+                lambda state, template=prompt_template: execute_task(state, template)
             )
 
     # Edges
@@ -179,7 +185,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     condition_nodes = find_nodes_by_type(node_map, "CONDITION")
     for condition in condition_nodes:
         condition_template = f"""{condition.description}
-        Based on the history, decide the condition result in the json format:
+        history: {{history}}, decide the condition result in the json format:
         "switch": True/False
         """
         workflow.add_node(
