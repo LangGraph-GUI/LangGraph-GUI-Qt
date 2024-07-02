@@ -1,7 +1,7 @@
 # NodeData.py
 
 from dataclasses import dataclass, asdict, field
-from typing import List
+from typing import List, Optional
 
 @dataclass
 class Serializable:
@@ -38,8 +38,8 @@ class NodeData(Serializable):
     output_var: str = ""
 
     # CONDITION
-    true_nexts: List[int] = field(default_factory=list)
-    false_nexts: List[int] = field(default_factory=list)
+    true_next: Optional[int] = None
+    false_next: Optional[int] = None
 
     nexts: List[int] = field(default_factory=list)
     prevs: List[int] = field(default_factory=list)

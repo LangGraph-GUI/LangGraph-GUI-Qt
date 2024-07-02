@@ -199,9 +199,12 @@ class Port(QGraphicsEllipseItem):
                         item.edges.append(self.edges[-1])
                         break
                     elif self.port_type in ["true", "false"] and item.port_type == "input":
-                        self.edges[-1].set_destination(item)
-                        item.edges.append(self.edges[-1])
-                        break
+                        source_node = self.parentItem().data
+                        if (self.port_type == "true" and source_node.true_next is None) or \
+                           (self.port_type == "false" and source_node.false_next is None):
+                            self.edges[-1].set_destination(item)
+                            item.edges.append(self.edges[-1])
+                            break
             else:
                 self.scene().removeItem(self.edges[-1])
                 self.edges.pop()

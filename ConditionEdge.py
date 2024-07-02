@@ -41,10 +41,11 @@ class ConditionEdge(QGraphicsPathItem):
         self.update_position()
         source_node = self.source_port.parentItem().data
         dest_node = self.destination_port.parentItem().data
+        
         if self.condition_type == "true":
-            source_node.true_nexts = [self.destination_id]
+            source_node.true_next = self.destination_id
         else:
-            source_node.false_nexts = [self.destination_id]
+            source_node.false_next = self.destination_id
         dest_node.prevs.append(self.source_id)
 
     def remove(self):
@@ -55,11 +56,11 @@ class ConditionEdge(QGraphicsPathItem):
         source_node = self.source_port.parentItem().data
         dest_node = self.destination_port.parentItem().data
         if self.condition_type == "true":
-            if self.destination_id in source_node.true_nexts:
-                source_node.true_nexts.remove(self.destination_id)
+            if self.destination_id == source_node.true_next:
+                source_node.true_next = None
         else:
-            if self.destination_id in source_node.false_nexts:
-                source_node.false_nexts.remove(self.destination_id)
+            if self.destination_id == source_node.false_next:
+                source_node.false_next = None
         if self.source_id in dest_node.prevs:
             dest_node.prevs.remove(self.source_id)
         self.scene().removeItem(self)
