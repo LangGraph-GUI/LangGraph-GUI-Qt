@@ -4,6 +4,7 @@ import json
 from PySide6.QtWidgets import QFileDialog
 from Node import Node
 from Edge import Edge
+from ConditionEdge import ConditionEdge  # Import ConditionEdge
 from NodeData import NodeData
 
 def save(scene):
@@ -42,10 +43,21 @@ def load(scene):
 
             # Collect edges
             edge_set = set()  # To track created edges and avoid duplicates
+
             for node_data in data["nodes"]:
                 source_id = node_data["uniq_id"]
                 for next_id in node_data["nexts"]:
-                    edge_tuple = (source_id, next_id)
+                    edge_tuple = (source_id, next_id, "output")
+                    edge_set.add(edge_tuple)
+
+                if "true_next" in node_data and node_data["true_next"] is not None:
+                    true_next_id = node_data["true_next"]
+                    edge_tuple = (source_id, true_next_id, "true")
+                    edge_set.add(edge_tuple)
+
+                if "false_next" in node_data and node_data["false_next"] is not None:
+                    false_next_id = node_data["false_next"]
+                    edge_tuple = (source_id, false_next_id, "false")
                     edge_set.add(edge_tuple)
 
             # Clear nexts and prevs to avoid duplicates
@@ -54,17 +66,28 @@ def load(scene):
                 node.data.prevs.clear()
 
             # Then create edges based on the collected edge_set
-            for source_id, next_id in edge_set:
+            for source_id, next_id, edge_type in edge_set:
                 if source_id in node_map and next_id in node_map:
                     source_node = node_map[source_id]
                     destination_node = node_map[next_id]
-                    edge = Edge(source_node.output_port)
-                    edge.set_destination(destination_node.input_port)
+                    
+                    if edge_type == "output":
+                        edge = Edge(source_node.output_port)
+                        edge.set_destination(destination_node.input_port)
+                    else:
+                        edge = ConditionEdge(source_node.true_port if edge_type == "true" else source_node.false_port, edge_type)
+                        edge.set_destination(destination_node.input_port)
+
                     scene.addItem(edge)
-                    source_node.output_port.edges.append(edge)
+                    if edge_type == "output":
+                        source_node.output_port.edges.append(edge)
+                    else:
+                        port = source_node.true_port if edge_type == "true" else source_node.false_port
+                        port.edges.append(edge)
+                    
                     destination_node.input_port.edges.append(edge)
 
             # Ensure edges are properly connected and update their positions
             for node in node_map.values():
-                for edge in node.input_port.edges + node.output_port.edges:
+                for edge in node.input_port.edges + node.output_port.edges + node.true_port.edges + node.false_port.edges:
                     edge.update_position()
