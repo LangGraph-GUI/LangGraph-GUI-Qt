@@ -35,6 +35,9 @@ class Slot:
         elif isinstance(self.edit, QLineEdit):
             setattr(self.parent.data, self.data_attr, self.edit.text())
 
+        # Trigger parent update
+        self.parent.update_node()
+
     def show(self):
         self.label.show()
         self.edit.show()
@@ -57,7 +60,7 @@ class NodeLayout(QGraphicsItem):
         self.type_layout = QHBoxLayout()
         self.type_label = QLabel("Type:")
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["START", "AGENT", "TASK", "STEP", "TEAM", "TOOL"])
+        self.type_combo.addItems(["START", "AGENT", "TASK", "STEP", "TEAM", "TOOL", "CONDITION"])
         self.type_combo.setCurrentText(self.parent.data.type)
         self.type_layout.addWidget(self.type_label)
         self.type_layout.addWidget(self.type_combo)
@@ -113,6 +116,7 @@ class NodeLayout(QGraphicsItem):
     def update_data_type(self):
         self.parent.data.type = self.type_combo.currentText()
         self.update_field_visibility()  # Update field visibility when type changes
+        self.parent.update_ports_visibility()  # Update the ports visibility in the parent node
 
     def update_field_visibility(self):
         node_type = self.parent.data.type
@@ -141,7 +145,10 @@ class NodeLayout(QGraphicsItem):
             self.slots["description"].show()
             self.slots["output_var"].show()
 
-
-
         # Update geometry after setting visibility
         self.update_proxy_widget_geometry()
+
+    def update_node(self):
+        # Method to update the parent node
+        self.parent.prepareGeometryChange()
+        self.parent.update()

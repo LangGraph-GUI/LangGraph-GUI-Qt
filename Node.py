@@ -2,7 +2,7 @@
 
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 from PySide6.QtCore import QRectF, Qt, QPointF
-from PySide6.QtGui import QPainter, QPen, QBrush, QPainterPath  # Add QPainterPath here
+from PySide6.QtGui import QPainter, QPen, QBrush, QPainterPath
 from Edge import Edge
 from NodeData import NodeData
 from NodeLayout import NodeLayout
@@ -22,21 +22,41 @@ class Node(QGraphicsItem):
         self.content = NodeLayout(self)
         self.input_port = Port(self, QPointF(0, 25), "input")
         self.output_port = Port(self, QPointF(self.rect.width(), 25), "output")
-        self.setPos(self.data.pos_x, self.data.pos_y)  # Set initial position from NodeData
+        
+        # Add true and false ports for condition nodes
+        self.true_port = Port(self, QPointF(self.rect.width() / 2, 0), "true")
+        self.true_port.setBrush(QBrush(Qt.green))
+        self.false_port = Port(self, QPointF(self.rect.width() / 2, self.rect.height()), "false")
+        self.false_port.setBrush(QBrush(Qt.red))
+
+        self.setPos(self.data.pos_x, self.data.pos_y)
         self.setAcceptHoverEvents(True)
-        self.hovered = False  # Track hover state
+        self.hovered = False
+        self.update_ports_visibility()
+
+    def update_ports_visibility(self):
+        if self.data.type == "CONDITION":
+            self.true_port.setVisible(True)
+            self.false_port.setVisible(True)
+            self.output_port.setVisible(False)
+        else:
+            self.true_port.setVisible(False)
+            self.false_port.setVisible(False)
+            self.output_port.setVisible(True)
 
     def setWidth(self, width):
         self.rect.setWidth(width)
         self.output_port.setPos(width, 25)
+        self.true_port.setPos(width / 2, 0)
         self.prepareGeometryChange()
-        self.content.update_proxy_widget_geometry()  # Ensure the content size is updated
+        self.content.update_proxy_widget_geometry()
         self.data.width = width
 
     def setHeight(self, height):
         self.rect.setHeight(height)
+        self.false_port.setPos(self.rect.width() / 2, height)
         self.prepareGeometryChange()
-        self.content.update_proxy_widget_geometry()  # Ensure the content size is updated
+        self.content.update_proxy_widget_geometry()
         self.data.height = height
 
     def boundingRect(self):
@@ -48,14 +68,13 @@ class Node(QGraphicsItem):
             pen.setColor(Qt.red)
         painter.setPen(pen)
         painter.drawRect(self.rect)
-        self.content.paint(painter, option, widget)  # Delegate the painting to NodeLayout
+        self.content.paint(painter, option, widget)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
-            for port in [self.input_port, self.output_port]:
+            for port in [self.input_port, self.output_port, self.true_port, self.false_port]:
                 for edge in port.edges:
                     edge.update_position()
-            # Sync position with NodeData
             self.data.pos_x = value.x()
             self.data.pos_y = value.y()
         return super().itemChange(change, value)
@@ -88,13 +107,15 @@ class Node(QGraphicsItem):
             super().mouseReleaseEvent(event)
 
     def remove_node(self):
-        # Remove all edges connected to this node
         for edge in self.input_port.edges[:]:
             edge.remove()
         for edge in self.output_port.edges[:]:
             edge.remove()
+        for edge in self.true_port.edges[:]:
+            edge.remove()
+        for edge in self.false_port.edges[:]:
+            edge.remove()
 
-        # Update prevs and nexts of connected nodes
         for prev_id in self.data.prevs:
             prev_node = self.scene().get_node_by_id(prev_id)
             if prev_node:
@@ -105,18 +126,18 @@ class Node(QGraphicsItem):
             if next_node:
                 next_node.data.prevs.remove(self.data.uniq_id)
 
-        # Finally, remove this node from the scene
         self.scene().removeItem(self)
 
     def hoverEnterEvent(self, event):
         self.hovered = True
-        self.update()  # Trigger a repaint
+        self.update()
         super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
         self.hovered = False
-        self.update()  # Trigger a repaint
+        self.update()
         super().hoverLeaveEvent(event)
+
 
 class Port(QGraphicsEllipseItem):
     def __init__(self, parent, position, port_type):
@@ -125,27 +146,30 @@ class Port(QGraphicsEllipseItem):
         self.setPos(position)
         self.port_type = port_type
         self.edges = []
-        self.setRect(self.boundingRect())  # Set the bounding rectangle for the port
+        self.setRect(self.boundingRect())
 
     def boundingRect(self):
         return QRectF(-5, -5, 10, 10)
 
     def paint(self, painter, option, widget):
-        painter.setBrush(Qt.black)
         painter.setPen(Qt.NoPen)
-        
-        # Define the triangle shape
+        if self.port_type == "true":
+            painter.setBrush(Qt.green)
+        elif self.port_type == "false":
+            painter.setBrush(Qt.red)
+        else:
+            painter.setBrush(Qt.black)
+
         path = QPainterPath()
         path.moveTo(-5, -5)
         path.lineTo(5, 0)
         path.lineTo(-5, 5)
         path.closeSubpath()
 
-
         painter.drawPath(path)
 
     def mousePressEvent(self, event):
-        if self.port_type == "output":
+        if self.port_type in ["output", "true", "false"]:
             edge = Edge(self)
             self.edges.append(edge)
             self.scene().addItem(edge)
@@ -159,7 +183,7 @@ class Port(QGraphicsEllipseItem):
             items = self.scene().items(event.scenePos())
             for item in items:
                 if isinstance(item, Port) and item != self:
-                    if self.port_type == "output" and item.port_type == "input":
+                    if self.port_type in ["output", "true"] and item.port_type == "input":
                         self.edges[-1].set_destination(item)
                         item.edges.append(self.edges[-1])
                         break
