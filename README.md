@@ -1,39 +1,55 @@
 # LangGraph-GUI
 
+![LangGraph-GUI](cover.webp)
 
-## Environment
+LangGraph-GUI is a user-friendly interface for managing and visualizing Node-Edge workflows with LangGraph. It supports creating, editing, and running workflows locally using language models by Ollama .
 
-### front-end GUI
-```
+## Environment Setup
+
+### Front-End GUI
+
+To install the required dependencies for the front-end GUI, run:
+```bash
 pip install PySide6
 ```
 
-## Run
+## Running the Application
 
-### front-end
+### Front-End
 
-```
+To start the front-end GUI, execute:
+```bash
 python frontend.py
 ```
-and you can read and write json file as DAG graph for crewai.
+This will allow you to read and write JSON files representing DAG workflows for CrewAI.
 
-### back-end
-if local run such mistral
+### Back-End
 
-```
+To run the back-end locally with a language model like Mistral, use:
+```bash
 python backend.py --graph example.json --llm mistral --tee output.log
 ```
-it will parse json file into crewai tasks and agents
+This command will parse the specified JSON file into CrewAI tasks and agents.
 
+## Building the Application
 
+### Front-End GUI
 
-## Build
-### front-end GUI
-remember hook 
+To build the front-end GUI into a standalone executable, follow these steps:
 
-```
-pip install pyinstaller
+1. Install PyInstaller:
+    ```bash
+    pip install pyinstaller
+    ```
 
-cd src
-pyinstaller --onefile --additional-hooks-dir=. frontend.py
-```
+2. Navigate to the source directory:
+    ```bash
+    cd src
+    ```
+
+3. Run PyInstaller with the necessary hooks:
+    ```bash
+    pyinstaller --onefile --additional-hooks-dir=. frontend.py
+    ```
+
+By following these instructions, you can easily set up, run, and build the LangGraph-GUI 

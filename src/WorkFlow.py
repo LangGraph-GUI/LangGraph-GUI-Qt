@@ -85,7 +85,6 @@ def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
 
     data = json.loads(generation)
     
-    print(data)
 
     choice = data
     tool_name = choice["function"]
@@ -95,6 +94,8 @@ def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
         raise ValueError(f"Tool {tool_name} not found in registry.")
     
     result = tool_registry[tool_name](*args)
+    print(data)
+    print(f"result: {result}")
     state["history"] += f"\nExecuted {tool_name} with result: {result}"
     state["history"] = clip_history(state["history"])
 
@@ -112,7 +113,7 @@ def condition_switch(state: PipelineState, prompt_template: str) -> PipelineStat
     
     print(data)
 
-    condition = data["condition"]
+    condition = data["switch"]
     state["condition"] = condition
     
     state["history"] += f"\nResult is {condition}"
@@ -121,7 +122,7 @@ def condition_switch(state: PipelineState, prompt_template: str) -> PipelineStat
     return state
 
 def conditional_edge(state: PipelineState) -> Literal["True", "False"]:
-    return "True" if state["condition"] else "False"
+    return "True" if state["condition"] == True else "False"
 
 def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     # Define the state machine
@@ -179,7 +180,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     for condition in condition_nodes:
         condition_template = f"""{condition.description}
         Based on the history, decide the condition result in the json format:
-        "condition": True/False
+        "switch": True/False
         """
         workflow.add_node(
             condition.uniq_id, 
