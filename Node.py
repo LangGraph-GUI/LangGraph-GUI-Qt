@@ -23,7 +23,7 @@ class Node(QGraphicsItem):
         self.content = NodeLayout(self)
         self.input_port = Port(self, QPointF(0, 25), "input")
         self.output_port = Port(self, QPointF(self.rect.width(), 25), "output")
-        
+
         # Add true and false ports for condition nodes
         self.true_port = Port(self, QPointF(self.rect.width() / 2, 0), "true")
         self.true_port.setBrush(QBrush(Qt.green))
@@ -44,6 +44,42 @@ class Node(QGraphicsItem):
             self.true_port.setVisible(False)
             self.false_port.setVisible(False)
             self.output_port.setVisible(True)
+        self.remove_incompatible_edges()
+
+    def remove_incompatible_edges(self):
+        if self.data.type == "CONDITION":
+            self.remove_normal_edges()
+        else:
+            self.remove_condition_edges()
+
+    def remove_normal_edges(self):
+        for edge in self.output_port.edges[:]:
+            edge.remove()
+        for prev_id in self.data.prevs:
+            prev_node = self.scene().get_node_by_id(prev_id)
+            if prev_node:
+                prev_node.data.nexts.remove(self.data.uniq_id)
+
+        for next_id in self.data.nexts:
+            next_node = self.scene().get_node_by_id(next_id)
+            if next_node:
+                next_node.data.prevs.remove(self.data.uniq_id)
+
+    def remove_condition_edges(self):
+        for edge in self.true_port.edges[:]:
+            edge.remove()
+        for edge in self.false_port.edges[:]:
+            edge.remove()
+
+        if self.data.true_next is not None:
+            next_node = self.scene().get_node_by_id(self.data.true_next)
+            if next_node:
+                next_node.data.true_prevs.remove(self.data.uniq_id)
+        
+        if self.data.false_next is not None:
+            next_node = self.scene().get_node_by_id(self.data.false_next)
+            if next_node:
+                next_node.data.false_prevs.remove(self.data.uniq_id)
 
     def setWidth(self, width):
         self.rect.setWidth(width)
@@ -108,35 +144,11 @@ class Node(QGraphicsItem):
             super().mouseReleaseEvent(event)
 
     def remove_node(self):
+        self.remove_normal_edges()
+        self.remove_condition_edges()
+
         for edge in self.input_port.edges[:]:
             edge.remove()
-        for edge in self.output_port.edges[:]:
-            edge.remove()
-        for edge in self.true_port.edges[:]:
-            edge.remove()
-        for edge in self.false_port.edges[:]:
-            edge.remove()
-
-        for prev_id in self.data.prevs:
-            prev_node = self.scene().get_node_by_id(prev_id)
-            if prev_node:
-                prev_node.data.nexts.remove(self.data.uniq_id)
-
-        for next_id in self.data.nexts:
-            next_node = self.scene().get_node_by_id(next_id)
-            if next_node:
-                next_node.data.prevs.remove(self.data.uniq_id)
-
-        # Remove true_next and false_next
-        if self.data.true_next is not None:
-            next_node = self.scene().get_node_by_id(self.data.true_next)
-            if next_node:
-                next_node.data.true_prevs.remove(self.data.uniq_id)
-        
-        if self.data.false_next is not None:
-            next_node = self.scene().get_node_by_id(self.data.false_next)
-            if next_node:
-                next_node.data.false_prevs.remove(self.data.uniq_id)
 
         self.scene().removeItem(self)
 
