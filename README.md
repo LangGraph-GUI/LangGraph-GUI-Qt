@@ -39,6 +39,9 @@ CONDITION node will mapping to LangGraph conditional_edge
 
 ![](condition.webp)
 
+### Other Resource
+If you want to learn LangGraph, we have LangGraph for dummy : [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn)
+
 
 ## Environment Setup
 
@@ -89,6 +92,3 @@ To build the front-end GUI into a standalone executable, follow these steps:
     ```
 
 By following these instructions, you can easily set up, run, and build the LangGraph-GUI 
-
-## Other Resource
-If you want to learn LangGraph, we have LangGraph for dummy learning : [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn)
