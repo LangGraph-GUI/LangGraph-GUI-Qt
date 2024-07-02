@@ -74,8 +74,26 @@ class MainWindow(QMainWindow):
         is_visible = self.dock_widget.isVisible()
         self.dock_widget.setVisible(not is_visible)
 
-
 class CustomGraphicsScene(QGraphicsScene):
     def __init__(self):
         super().__init__()
         self.node_counter = 1  # Initialize the counter
+        self.nodes_by_id = {}  # Dictionary to store nodes by their unique IDs
+
+    def add_node(self, node):
+        self.addItem(node)
+        self.nodes_by_id[node.data.uniq_id] = node
+        self.node_counter += 1
+
+    def remove_node(self, node):
+        if node.data.uniq_id in self.nodes_by_id:
+            del self.nodes_by_id[node.data.uniq_id]
+        self.removeItem(node)
+
+    def get_node_by_id(self, node_id):
+        return self.nodes_by_id.get(node_id)
+
+    def clear(self):
+        super().clear()
+        self.nodes_by_id.clear()
+        self.node_counter = 1

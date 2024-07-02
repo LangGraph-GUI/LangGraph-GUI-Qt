@@ -41,6 +41,10 @@ def load(scene):
                 scene.addItem(node)
                 node_map[node_data_obj.uniq_id] = node
 
+            # Initialize nodes in the scene
+            for node in node_map.values():
+                node.initialize_in_scene()
+
             # Collect edges
             edge_set = set()  # To track created edges and avoid duplicates
 

@@ -61,9 +61,9 @@ class CustomGraphicsView(QGraphicsView):
         unique_id = f"uniq_id_{self.scene().node_counter}"
         node_data = NodeData(name="Node", uniq_id=unique_id)
         node = Node(node_data)
-        self.scene().addItem(node)
         node.setPos(position)  # Set the node position to the right-click position
-        self.scene().node_counter += 1  # Increment the counter
+        self.scene().add_node(node)  # Add the node using the scene's method
+        node.initialize_in_scene()  # Initialize the node in the scene
         self.update_map_view()
 
     def remove_node(self):

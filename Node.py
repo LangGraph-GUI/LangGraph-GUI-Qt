@@ -8,7 +8,6 @@ from ConditionEdge import ConditionEdge
 from NodeData import NodeData
 from NodeLayout import NodeLayout
 
-
 class Node(QGraphicsItem):
     def __init__(self, node_data: NodeData):
         super().__init__()
@@ -33,6 +32,8 @@ class Node(QGraphicsItem):
         self.setPos(self.data.pos_x, self.data.pos_y)
         self.setAcceptHoverEvents(True)
         self.hovered = False
+
+    def initialize_in_scene(self):
         self.update_ports_visibility()
 
     def update_ports_visibility(self):
