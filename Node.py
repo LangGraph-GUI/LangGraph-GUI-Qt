@@ -127,6 +127,17 @@ class Node(QGraphicsItem):
             if next_node:
                 next_node.data.prevs.remove(self.data.uniq_id)
 
+        # Remove true_next and false_next
+        if self.data.true_next is not None:
+            next_node = self.scene().get_node_by_id(self.data.true_next)
+            if next_node:
+                next_node.data.prevs.remove(self.data.uniq_id)
+        
+        if self.data.false_next is not None:
+            next_node = self.scene().get_node_by_id(self.data.false_next)
+            if next_node:
+                next_node.data.prevs.remove(self.data.uniq_id)
+
         self.scene().removeItem(self)
 
     def hoverEnterEvent(self, event):
