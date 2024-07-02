@@ -56,7 +56,6 @@ class PipelineState(TypedDict):
     history: Annotated[str, operator.add]
     task: Annotated[str, operator.add]
 
-
 def execute_task(state: PipelineState, prompt_template: str) -> PipelineState:
     state["history"] = clip_history(state["history"])
     
@@ -73,6 +72,31 @@ def execute_task(state: PipelineState, prompt_template: str) -> PipelineState:
 
     return state
 
+def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
+    state["history"] = clip_history(state["history"])
+    
+    prompt = PromptTemplate.from_template(prompt_template)
+    llm_chain = prompt | llm | StrOutputParser()
+    inputs = {"history": state["history"], "roll_number": -1}
+    generation = llm_chain.invoke(inputs)
+
+    data = json.loads(generation)
+    
+    print(data)
+
+    choice = data
+    tool_name = choice["function"]
+    args = choice["args"]
+    
+    if tool_name not in tool_registry:
+        raise ValueError(f"Tool {tool_name} not found in registry.")
+    
+    result = tool_registry[tool_name](*args)
+    state["history"] += f"\nExecuted {tool_name} with result: {result}"
+    state["history"] = clip_history(state["history"])
+
+    return state
+
 def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     # Define the state machine
     workflow = StateGraph(PipelineState)
@@ -81,15 +105,33 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     start_node = find_nodes_by_type(node_map, "START")[0]
     print(f"Start root ID: {start_node.uniq_id}")
 
+    # Tool nodes for lookup
+    tool_nodes = find_nodes_by_type(node_map, "TOOL")
+    tool_map = {tool_node.name: tool_node.description for tool_node in tool_nodes}
+
     # Step nodes
     step_nodes = find_nodes_by_type(node_map, "STEP")
     for current_node in step_nodes:
-        workflow.add_node(
-            current_node.uniq_id, 
-            lambda state, template=current_node.description: execute_task(state, template)
-        )
+        if current_node.tool:
+            tool_description = tool_map[current_node.tool]
+            prompt_template = f"""{current_node.description}
+            Available tool: {tool_description}
+            Based on the history, choose the appropriate tool and arguments in the json format:
+            "function": "<function>", "args": [<arg1>, <arg2>, ...]
 
-    # edges
+            next stage directly parse then run <function>(<arg1>,<arg2>, ...) make sure syntax can run
+            """
+            workflow.add_node(
+                current_node.uniq_id, 
+                lambda state, template=prompt_template: execute_tool(state, template)
+            )
+        else:
+            workflow.add_node(
+                current_node.uniq_id, 
+                lambda state, template=current_node.description: execute_task(state, template)
+            )
+
+    # Edges
     # Find all next nodes from start_node
     next_node_ids = start_node.nexts
     next_nodes = [node_map[next_id] for next_id in next_node_ids]
@@ -108,7 +150,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 
     initial_state = PipelineState(
         history="",
-        roll_number = -1
+        task=""
     )
 
     app = workflow.compile()
@@ -118,12 +160,15 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 def run_workflow_from_file(filename: str, llm):
     node_map = load_nodes_from_json(filename)
 
+    # Tool nodes for lookup
     tool_nodes = find_nodes_by_type(node_map, "TOOL")
+    tool_map = {tool_node.name: tool_node.description for tool_node in tool_nodes}
+
     for tool in tool_nodes:
-        tool_code = f"@tool\n{tool.description}"
+        tool_code = f"{tool.description}"
         # Register the tool function dynamically
         exec(tool_code, globals())
 
-
     RunWorkFlow(node_map, llm)
+
 
