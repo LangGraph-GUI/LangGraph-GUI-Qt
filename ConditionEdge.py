@@ -46,9 +46,10 @@ class ConditionEdge(QGraphicsPathItem):
         
         if self.condition_type == "true":
             source_node.true_next = self.destination_id
+            dest_node.true_prevs.append(self.source_id)
         else:
             source_node.false_next = self.destination_id
-        dest_node.prevs.append(self.source_id)
+            dest_node.false_prevs.append(self.source_id)
 
     def remove(self):
         if self in self.source_port.edges:
@@ -60,11 +61,13 @@ class ConditionEdge(QGraphicsPathItem):
         if self.condition_type == "true":
             if self.destination_id == source_node.true_next:
                 source_node.true_next = None
+            if self.source_id in dest_node.true_prevs:
+                dest_node.true_prevs.remove(self.source_id)
         else:
             if self.destination_id == source_node.false_next:
                 source_node.false_next = None
-        if self.source_id in dest_node.prevs:
-            dest_node.prevs.remove(self.source_id)
+            if self.source_id in dest_node.false_prevs:
+                dest_node.false_prevs.remove(self.source_id)
         self.scene().removeItem(self)
 
     def hoverEnterEvent(self, event):

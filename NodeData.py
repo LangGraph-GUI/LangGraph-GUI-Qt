@@ -15,14 +15,20 @@ class Serializable:
 @dataclass
 class NodeData(Serializable):
     
-    # "START", "AGENT", "TASK", "STEP", "TEAM", "TOOL", "CONDITION"
-    type: str = ""
-
+    # Graph Feature
     uniq_id: str = ""
     pos_x: float = 0.0
     pos_y: float = 0.0
     width: float = 200.0  # Default width
     height: float = 200.0  # Default height
+
+
+    nexts: List[int] = field(default_factory=list)
+    prevs: List[int] = field(default_factory=list)
+
+    # LangGraph attribute
+    # "START", "AGENT", "TASK", "STEP", "TEAM", "TOOL", "CONDITION"
+    type: str = "START"
 
     # AGENT
     name: str = ""
@@ -40,9 +46,9 @@ class NodeData(Serializable):
     # CONDITION
     true_next: Optional[int] = None
     false_next: Optional[int] = None
+    true_prevs: List[int] = field(default_factory=list)
+    false_prevs: List[int] = field(default_factory=list)
 
-    nexts: List[int] = field(default_factory=list)
-    prevs: List[int] = field(default_factory=list)
 
     def to_dict(self):
         return asdict(self)

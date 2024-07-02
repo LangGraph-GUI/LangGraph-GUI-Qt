@@ -131,12 +131,12 @@ class Node(QGraphicsItem):
         if self.data.true_next is not None:
             next_node = self.scene().get_node_by_id(self.data.true_next)
             if next_node:
-                next_node.data.prevs.remove(self.data.uniq_id)
+                next_node.data.true_prevs.remove(self.data.uniq_id)
         
         if self.data.false_next is not None:
             next_node = self.scene().get_node_by_id(self.data.false_next)
             if next_node:
-                next_node.data.prevs.remove(self.data.uniq_id)
+                next_node.data.false_prevs.remove(self.data.uniq_id)
 
         self.scene().removeItem(self)
 
