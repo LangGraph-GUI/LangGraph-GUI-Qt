@@ -1,6 +1,8 @@
+# WorkFlow.py
+
 import os
 import json
-from typing import Dict, List, TypedDict, Any, Annotated, Callable
+from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal
 import operator
 import inspect
 from NodeData import NodeData
@@ -55,13 +57,14 @@ def clip_history(history: str, max_chars: int = 8000) -> str:
 class PipelineState(TypedDict):
     history: Annotated[str, operator.add]
     task: Annotated[str, operator.add]
+    condition: Annotated[bool, ""]
 
 def execute_task(state: PipelineState, prompt_template: str) -> PipelineState:
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
     llm_chain = prompt | llm | StrOutputParser()
-    inputs = {"history": state["history"], "roll_number": -1}
+    inputs = {"history": state["history"]}
     generation = llm_chain.invoke(inputs)
     data = json.loads(generation)
     
@@ -77,7 +80,7 @@ def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
     
     prompt = PromptTemplate.from_template(prompt_template)
     llm_chain = prompt | llm | StrOutputParser()
-    inputs = {"history": state["history"], "roll_number": -1}
+    inputs = {"history": state["history"]}
     generation = llm_chain.invoke(inputs)
 
     data = json.loads(generation)
@@ -96,6 +99,29 @@ def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
     state["history"] = clip_history(state["history"])
 
     return state
+
+def condition_switch(state: PipelineState, prompt_template: str) -> PipelineState:
+    state["history"] = clip_history(state["history"])
+    
+    prompt = PromptTemplate.from_template(prompt_template)
+    llm_chain = prompt | llm | StrOutputParser()
+    inputs = {"history": state["history"]}
+    generation = llm_chain.invoke(inputs)
+
+    data = json.loads(generation)
+    
+    print(data)
+
+    condition = data["condition"]
+    state["condition"] = condition
+    
+    state["history"] += f"\nResult is {condition}"
+    state["history"] = clip_history(state["history"])
+
+    return state
+
+def conditional_edge(state: PipelineState) -> Literal["True", "False"]:
+    return "True" if state["condition"] else "False"
 
 def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     # Define the state machine
@@ -146,11 +172,36 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         
         for next_node in next_nodes:
             print(f"{node.name} {node.uniq_id}'s next node: {next_node.name} {next_node.uniq_id}, Type: {next_node.type}")
-            workflow.add_edge(node.uniq_id, next_node.uniq_id)   
+            workflow.add_edge(node.uniq_id, next_node.uniq_id)
+
+    # Find all condition nodes
+    condition_nodes = find_nodes_by_type(node_map, "CONDITION")
+    for condition in condition_nodes:
+        condition_template = f"""{condition.description}
+        Based on the history, decide the condition result in the json format:
+        "condition": True/False
+        """
+        workflow.add_node(
+            condition.uniq_id, 
+            lambda state, template=condition_template: condition_switch(state, template)
+        )
+
+        print(f"{condition.name} {condition.uniq_id}'s condition")
+        print(f"true will go {condition.true_next}")
+        print(f"false will go {condition.false_next}")
+        workflow.add_conditional_edges(
+            condition.uniq_id,
+            conditional_edge,
+            {
+                "True": condition.true_next if condition.true_next else END,
+                "False": condition.false_next if condition.false_next else END
+            }
+        )
 
     initial_state = PipelineState(
         history="",
-        task=""
+        task="",
+        condition=False
     )
 
     app = workflow.compile()
@@ -170,5 +221,4 @@ def run_workflow_from_file(filename: str, llm):
         exec(tool_code, globals())
 
     RunWorkFlow(node_map, llm)
-
 

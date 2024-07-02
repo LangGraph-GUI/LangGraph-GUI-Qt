@@ -127,10 +127,7 @@ class NodeLayout(QGraphicsItem):
             pass
         elif node_type == "TEAM":
             self.slots["name"].show()
-        elif node_type == "AGENT":
-            self.slots["name"].show()
-            self.slots["description"].show()
-        elif node_type == "TOOL":
+        elif node_type in ["AGENT", "TOOL", "CONDITION"]:
             self.slots["name"].show()
             self.slots["description"].show()
         elif node_type == "TASK":
