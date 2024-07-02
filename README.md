@@ -34,6 +34,10 @@ Tool node need write real python function code, and need `@tool` decorator like 
 #### Contition Node
 CONDITION node will mapping to LangGraph conditional_edge
 
+* green edge is true case path
+* red edge is false case path
+
+![](condition.webp)
 
 
 ## Environment Setup
