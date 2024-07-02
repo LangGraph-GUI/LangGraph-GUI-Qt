@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 from PySide6.QtCore import QRectF, Qt, QPointF
 from PySide6.QtGui import QPainter, QPen, QBrush, QPainterPath
 from Edge import Edge
+from ConditionEdge import ConditionEdge  # Import ConditionEdge
 from NodeData import NodeData
 from NodeLayout import NodeLayout
 
@@ -169,10 +170,20 @@ class Port(QGraphicsEllipseItem):
         painter.drawPath(path)
 
     def mousePressEvent(self, event):
-        if self.port_type in ["output", "true", "false"]:
-            edge = Edge(self)
-            self.edges.append(edge)
-            self.scene().addItem(edge)
+        if self.port_type == "output":
+            self.create_edge(event)
+        elif self.port_type in ["true", "false"]:
+            self.create_condition_edge(event)
+
+    def create_edge(self, event):
+        edge = Edge(self)
+        self.edges.append(edge)
+        self.scene().addItem(edge)
+
+    def create_condition_edge(self, event):
+        condition_edge = ConditionEdge(self, self.port_type)
+        self.edges.append(condition_edge)
+        self.scene().addItem(condition_edge)
 
     def mouseMoveEvent(self, event):
         if self.edges:
@@ -183,7 +194,11 @@ class Port(QGraphicsEllipseItem):
             items = self.scene().items(event.scenePos())
             for item in items:
                 if isinstance(item, Port) and item != self:
-                    if self.port_type in ["output", "true"] and item.port_type == "input":
+                    if self.port_type == "output" and item.port_type == "input":
+                        self.edges[-1].set_destination(item)
+                        item.edges.append(self.edges[-1])
+                        break
+                    elif self.port_type in ["true", "false"] and item.port_type == "input":
                         self.edges[-1].set_destination(item)
                         item.edges.append(self.edges[-1])
                         break

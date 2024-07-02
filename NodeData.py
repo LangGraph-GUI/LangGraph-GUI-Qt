@@ -15,7 +15,7 @@ class Serializable:
 @dataclass
 class NodeData(Serializable):
     
-    # "START", "AGENT", "TASK", "STEP", "TEAM", "TOOL"
+    # "START", "AGENT", "TASK", "STEP", "TEAM", "TOOL", "CONDITION"
     type: str = ""
 
     uniq_id: str = ""
@@ -37,6 +37,9 @@ class NodeData(Serializable):
     task: str = ""
     output_var: str = ""
 
+    # CONDITION
+    true_nexts: List[int] = field(default_factory=list)
+    false_nexts: List[int] = field(default_factory=list)
 
     nexts: List[int] = field(default_factory=list)
     prevs: List[int] = field(default_factory=list)
