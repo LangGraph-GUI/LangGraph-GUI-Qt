@@ -15,6 +15,7 @@ class Edge(QGraphicsPathItem):
         self.destination_id = None
         self.update_position()
         self.setAcceptHoverEvents(True)
+        self.setZValue(1)  # Set a higher ZValue for edges
 
     def update_position(self, end_point=None):
         path = QPainterPath()

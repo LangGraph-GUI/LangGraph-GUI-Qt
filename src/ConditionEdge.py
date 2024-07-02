@@ -17,6 +17,8 @@ class ConditionEdge(QGraphicsPathItem):
         self.destination_id = None
         self.update_position()
         self.setAcceptHoverEvents(True)  # Enable hover events
+        self.setZValue(2)  # Set a higher ZValue for conditional edges
+
 
     def update_position(self, end_point=None):
         path = QPainterPath()

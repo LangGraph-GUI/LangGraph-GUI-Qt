@@ -22,6 +22,8 @@ class Node(QGraphicsItem):
         self.content = NodeLayout(self)
         self.input_port = Port(self, QPointF(0, 25), "input")
         self.output_port = Port(self, QPointF(self.rect.width(), 25), "output")
+        self.setZValue(0)  # Set a lower ZValue for nodes
+
 
         # Add true and false ports for condition nodes
         self.true_port = Port(self, QPointF(self.rect.width() / 2, 0), "true")
