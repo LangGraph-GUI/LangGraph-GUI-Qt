@@ -1,8 +1,11 @@
 # LangGraph-GUI
 
+LangGraph-GUI is a user-friendly interface for managing and visualizing Node-Edge workflows with LangGraph. It supports creating, editing, and running workflows locally using language models by Ollama .
+
+This is node-edge based gui will export to json for better decoupling.
+
 ![LangGraph-GUI](cover.webp)
 
-LangGraph-GUI is a user-friendly interface for managing and visualizing Node-Edge workflows with LangGraph. It supports creating, editing, and running workflows locally using language models by Ollama .
 
 ## Environment Setup
 
@@ -53,3 +56,6 @@ To build the front-end GUI into a standalone executable, follow these steps:
     ```
 
 By following these instructions, you can easily set up, run, and build the LangGraph-GUI 
+
+## Other Resource
+If you want to learn LangGraph, we have LangGraph for dummy learning : [LangGraph-learn](../LangGraph-learn)
