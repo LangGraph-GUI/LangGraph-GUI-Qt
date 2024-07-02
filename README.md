@@ -58,4 +58,4 @@ To build the front-end GUI into a standalone executable, follow these steps:
 By following these instructions, you can easily set up, run, and build the LangGraph-GUI 
 
 ## Other Resource
-If you want to learn LangGraph, we have LangGraph for dummy learning : [LangGraph-learn](../LangGraph-learn)
+If you want to learn LangGraph, we have LangGraph for dummy learning : [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn)
