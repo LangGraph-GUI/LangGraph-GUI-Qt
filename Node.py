@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 from PySide6.QtCore import QRectF, Qt, QPointF
 from PySide6.QtGui import QPainter, QPen, QBrush, QPainterPath
 from Edge import Edge
-from ConditionEdge import ConditionEdge  # Import ConditionEdge
+from ConditionEdge import ConditionEdge
 from NodeData import NodeData
 from NodeLayout import NodeLayout
 
@@ -55,14 +55,14 @@ class Node(QGraphicsItem):
     def remove_normal_edges(self):
         for edge in self.output_port.edges[:]:
             edge.remove()
-        for prev_id in self.data.prevs:
+        for prev_id in self.data.prevs[:]:
             prev_node = self.scene().get_node_by_id(prev_id)
-            if prev_node:
+            if prev_node and self.data.uniq_id in prev_node.data.nexts:
                 prev_node.data.nexts.remove(self.data.uniq_id)
 
-        for next_id in self.data.nexts:
+        for next_id in self.data.nexts[:]:
             next_node = self.scene().get_node_by_id(next_id)
-            if next_node:
+            if next_node and self.data.uniq_id in next_node.data.prevs:
                 next_node.data.prevs.remove(self.data.uniq_id)
 
     def remove_condition_edges(self):
@@ -73,12 +73,12 @@ class Node(QGraphicsItem):
 
         if self.data.true_next is not None:
             next_node = self.scene().get_node_by_id(self.data.true_next)
-            if next_node:
+            if next_node and self.data.uniq_id in next_node.data.true_prevs:
                 next_node.data.true_prevs.remove(self.data.uniq_id)
-        
+
         if self.data.false_next is not None:
             next_node = self.scene().get_node_by_id(self.data.false_next)
-            if next_node:
+            if next_node and self.data.uniq_id in next_node.data.false_prevs:
                 next_node.data.false_prevs.remove(self.data.uniq_id)
 
     def setWidth(self, width):
