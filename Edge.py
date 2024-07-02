@@ -56,7 +56,7 @@ class Edge(QGraphicsPathItem):
         self.scene().removeItem(self)
         
     def hoverEnterEvent(self, event):
-        self.setPen(QPen(Qt.red, 2))  # Change color on hover
+        self.setPen(QPen(Qt.blue, 2))  # Change color on hover
         self.setCursor(Qt.PointingHandCursor)
         super().hoverEnterEvent(event)
 

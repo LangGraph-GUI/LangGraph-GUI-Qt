@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt, QPointF, QElapsedTimer
 from NodeData import NodeData
 from Node import Node
 from Edge import Edge
+from ConditionEdge import ConditionEdge  # Import ConditionEdge
 from NodeLayout import NodeLayout  # Make sure to import NodeLayout
 
 class CustomGraphicsView(QGraphicsView):
@@ -25,10 +26,10 @@ class CustomGraphicsView(QGraphicsView):
 
             # Check if the right-click is on an Edge or a Node
             item = self.itemAt(event.pos())
-            while item and not isinstance(item, (Node, Edge)) and isinstance(item, (QGraphicsProxyWidget, NodeLayout)):
+            while item and not isinstance(item, (Node, Edge, ConditionEdge)) and isinstance(item, (QGraphicsProxyWidget, NodeLayout)):
                 item = item.parentItem()
 
-            if isinstance(item, Edge):
+            if isinstance(item, (Edge, ConditionEdge)):
                 self.right_clicked_item = item
             elif isinstance(item, Node):
                 self.right_clicked_item = item
@@ -71,7 +72,7 @@ class CustomGraphicsView(QGraphicsView):
             self.right_clicked_item = None
 
     def remove_edge(self):
-        if self.right_clicked_item and isinstance(self.right_clicked_item, Edge):
+        if self.right_clicked_item and isinstance(self.right_clicked_item, (Edge, ConditionEdge)):
             self.right_clicked_item.remove()
             self.right_clicked_item = None
 
@@ -88,7 +89,7 @@ class CustomGraphicsView(QGraphicsView):
         self.right_click_position = self.mapToScene(position)
         context_menu = QMenu(self)
 
-        if isinstance(self.right_clicked_item, Edge):
+        if isinstance(self.right_clicked_item, (Edge, ConditionEdge)):
             remove_edge_action = QAction("Remove Edge", self)
             remove_edge_action.triggered.connect(self.remove_edge)
             context_menu.addAction(remove_edge_action)

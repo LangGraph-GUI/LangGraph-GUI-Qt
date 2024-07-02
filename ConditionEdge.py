@@ -10,11 +10,13 @@ class ConditionEdge(QGraphicsPathItem):
         self.source_port = source_port
         self.source_id = source_port.parentItem().data.uniq_id
         self.condition_type = condition_type
-        self.setPen(QPen(Qt.green if condition_type == "true" else Qt.red, 2))
+        self.default_color = Qt.green if condition_type == "true" else Qt.red
+        self.setPen(QPen(self.default_color, 2))
         self.setZValue(-1)
         self.destination_port = None
         self.destination_id = None
         self.update_position()
+        self.setAcceptHoverEvents(True)  # Enable hover events
 
     def update_position(self, end_point=None):
         path = QPainterPath()
@@ -64,3 +66,13 @@ class ConditionEdge(QGraphicsPathItem):
         if self.source_id in dest_node.prevs:
             dest_node.prevs.remove(self.source_id)
         self.scene().removeItem(self)
+
+    def hoverEnterEvent(self, event):
+        self.setPen(QPen(Qt.blue, 2))  # Change color on hover
+        self.setCursor(Qt.PointingHandCursor)
+        super().hoverEnterEvent(event)
+
+    def hoverLeaveEvent(self, event):
+        self.setPen(QPen(self.default_color, 2))  # Revert color on hover exit
+        self.unsetCursor()
+        super().hoverLeaveEvent(event)
