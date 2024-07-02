@@ -51,6 +51,13 @@ To install the required dependencies for the front-end GUI, run:
 ```bash
 pip install PySide6
 ```
+### Back-End
+
+To install the required dependencies for the LangGraph, run:
+```bash
+pip install langchain langchain-community langchain-core langgraph
+```
+
 
 ## Running the Application
 
