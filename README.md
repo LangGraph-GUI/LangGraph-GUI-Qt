@@ -71,11 +71,16 @@ This will allow you to read and write JSON files representing DAG workflows for 
 
 ### Back-End
 
-To run the back-end locally with a language model like Mistral, use:
+If want to run local llm, need run Ollama first
+```bash
+ollama serve
+```
+Then run the back-end locally with a model such mistral, use:
 ```bash
 python backend.py --graph example.json --llm mistral --tee output.log
 ```
-This command will parse the specified JSON file into CrewAI tasks and agents.
+This command will parse the specified JSON file into Graph.
+
 
 ## Building the Application
 
