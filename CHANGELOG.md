@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.5.1] - 2024-07-03
+### Fixed
+- QTextEdit wrong multi lines
+- QTextEdit convert to pure text
+
+
+## [0.5.1] - 2024-07-03
 ### Feature
 - add license
 

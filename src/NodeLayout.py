@@ -17,7 +17,12 @@ class Slot:
 
     def create_widgets(self):
         self.label = QLabel(self.data_attr.capitalize())
-        self.edit = self.widget_class(getattr(self.parent.data, self.data_attr))
+        self.edit = self.widget_class()
+        # Set the initial text without formatting
+        if isinstance(self.edit, QTextEdit):
+            self.edit.setPlainText(getattr(self.parent.data, self.data_attr))
+        else:
+            self.edit.setText(getattr(self.parent.data, self.data_attr))
 
     def add_to_layout(self):
         self.layout.addWidget(self.label)
@@ -149,3 +154,4 @@ class NodeLayout(QGraphicsItem):
         # Method to update the parent node
         self.parent.prepareGeometryChange()
         self.parent.update()
+
