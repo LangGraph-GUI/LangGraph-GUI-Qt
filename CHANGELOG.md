@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.1] - 2024-07-03
 ### Fixed
+- Better function signature for prompt
+
+### Add
+- example/save_file.json
+
+## [0.5.1] - 2024-07-03
+### Fixed
 - QTextEdit wrong multi lines
 - QTextEdit convert to pure text
 
