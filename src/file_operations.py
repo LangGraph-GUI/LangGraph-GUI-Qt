@@ -68,6 +68,8 @@ def load(scene):
             for node in node_map.values():
                 node.data.nexts.clear()
                 node.data.prevs.clear()
+                node.data.true_prevs = []  # Clear true_prevs
+                node.data.false_prevs = []  # Clear false_prevs
 
             # Then create edges based on the collected edge_set
             for source_id, next_id, edge_type in edge_set:
