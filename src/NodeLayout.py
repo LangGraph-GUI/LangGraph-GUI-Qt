@@ -65,7 +65,7 @@ class NodeLayout(QGraphicsItem):
         self.type_layout = QHBoxLayout()
         self.type_label = QLabel("Type:")
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["START", "AGENT", "TASK", "STEP", "TEAM", "TOOL", "CONDITION"])
+        self.type_combo.addItems(["START", "STEP", "TOOL", "CONDITION"])
         self.type_combo.setCurrentText(self.parent.data.type)
         self.type_layout.addWidget(self.type_label)
         self.type_layout.addWidget(self.type_combo)
@@ -75,16 +75,10 @@ class NodeLayout(QGraphicsItem):
         # Initialize slots
         self.slots = {}
         self.add_slot("name", QLineEdit)
-        self.add_slot("tool", QLineEdit)
 
-        # Agent
-
-        # Task
-        self.add_slot("team", QLineEdit)
 
         # Step
-        self.add_slot("agent", QLineEdit)
-        self.add_slot("task", QLineEdit)
+        self.add_slot("tool", QLineEdit)
         self.add_slot("description", QTextEdit)
         self.add_slot("output_var", QLineEdit)
         
@@ -130,20 +124,14 @@ class NodeLayout(QGraphicsItem):
 
         if node_type in ["START"]:
             pass
-        elif node_type == "TEAM":
-            self.slots["name"].show()
-        elif node_type in ["AGENT", "TOOL", "CONDITION"]:
-            self.slots["name"].show()
+        elif node_type == "TOOL":
             self.slots["description"].show()
-        elif node_type == "TASK":
+        elif node_type == "CONDITION":
             self.slots["name"].show()
-            self.slots["team"].show()
             self.slots["description"].show()
         elif node_type == "STEP":
             self.slots["name"].show()
-            self.slots["agent"].show()
             self.slots["tool"].show()
-            self.slots["task"].show()
             self.slots["description"].show()
             self.slots["output_var"].show()
 

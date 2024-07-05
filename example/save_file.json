@@ -1,0 +1,85 @@
+{
+    "nodes": [
+        {
+            "uniq_id": "uniq_id_4",
+            "pos_x": -314.0,
+            "pos_y": -1407.0,
+            "width": 402.0,
+            "height": 377.0,
+            "nexts": [],
+            "prevs": [],
+            "type": "TOOL",
+            "name": "Node",
+            "description": "import os\n\n@tool\ndef save_file(file_path: str, content: str) -> None:\n    \"\"\"\n    :function: save_file\n    :param file_path: Path to the file where the content will be saved\n    :param content: The content to be written to the file\n    :return: True if the file was saved successfully, False otherwise\n    \"\"\"\n    try:\n        with open(file_path, 'w', encoding='utf-8') as file:\n            file.write(content)\n    except Exception as e:\n        print(f\"An error occurred: {e}\")\n",
+            "tool": "",
+            "output_var": "",
+            "true_next": null,
+            "false_next": null,
+            "true_prevs": [],
+            "false_prevs": []
+        },
+        {
+            "uniq_id": "uniq_id_3",
+            "pos_x": -528.0,
+            "pos_y": -1014.0,
+            "width": 357.0,
+            "height": 306.0,
+            "nexts": [],
+            "prevs": [
+                "uniq_id_2"
+            ],
+            "type": "STEP",
+            "name": "Node",
+            "description": "save the content",
+            "tool": "save_file",
+            "output_var": "",
+            "true_next": null,
+            "false_next": null,
+            "true_prevs": [],
+            "false_prevs": []
+        },
+        {
+            "uniq_id": "uniq_id_2",
+            "pos_x": -821.0,
+            "pos_y": -1187.0,
+            "width": 244.0,
+            "height": 293.0,
+            "nexts": [
+                "uniq_id_3"
+            ],
+            "prevs": [
+                "uniq_id_1"
+            ],
+            "type": "STEP",
+            "name": "Node",
+            "description": "write an article, content is startup.md",
+            "tool": "",
+            "output_var": "",
+            "true_next": null,
+            "false_next": null,
+            "true_prevs": [],
+            "false_prevs": []
+        },
+        {
+            "uniq_id": "uniq_id_1",
+            "pos_x": -1084.0,
+            "pos_y": -1364.0,
+            "width": 200.0,
+            "height": 200.0,
+            "nexts": [
+                "uniq_id_2"
+            ],
+            "prevs": [],
+            "type": "START",
+            "name": "Node",
+            "description": "",
+            "tool": "",
+            "output_var": "",
+            "true_next": null,
+            "false_next": null,
+            "true_prevs": [],
+            "false_prevs": []
+        }
+    ],
+    "node_counter": 5
+}

@@ -13,23 +13,15 @@ from langgraph.graph import StateGraph, END, START
 
 # Tool registry to hold information about tools
 tool_registry: Dict[str, Callable] = {}
-tool_info_registry: List[Dict[str, Any]] = []
+tool_info_registry: Dict[str, str] = {}
 
 # Decorator to register tools
 def tool(func: Callable) -> Callable:
     signature = inspect.signature(func)
     docstring = func.__doc__ or ""
-    params = [
-        {"name": param.name, "type": param.annotation}
-        for param in signature.parameters.values()
-    ]
-    tool_info = {
-        "name": func.__name__,
-        "description": docstring,
-        "parameters": params
-    }
+    tool_info = f"{func.__name__}{signature} - {docstring}"
     tool_registry[func.__name__] = func
-    tool_info_registry.append(tool_info)
+    tool_info_registry[func.__name__] = tool_info
     return func
 
 # Load local language model
@@ -85,7 +77,6 @@ def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
 
     data = json.loads(generation)
     
-
     choice = data
     tool_name = choice["function"]
     args = choice["args"]
@@ -132,19 +123,15 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     start_node = find_nodes_by_type(node_map, "START")[0]
     print(f"Start root ID: {start_node.uniq_id}")
 
-    # Tool nodes for lookup
-    tool_nodes = find_nodes_by_type(node_map, "TOOL")
-    tool_map = {tool_node.name: tool_node.description for tool_node in tool_nodes}
-
     # Step nodes
     step_nodes = find_nodes_by_type(node_map, "STEP")
     for current_node in step_nodes:
         if current_node.tool:
-            tool_description = tool_map[current_node.tool]
+            tool_info = tool_info_registry[current_node.tool]
             prompt_template = f"""
             history: {{history}}
             {current_node.description}
-            Available tool: {tool_description}
+            Available tool: {tool_info}
             Based on the history, choose the appropriate tool and arguments in the json format:
             "function": "<function>", "args": [<arg1>, <arg2>, ...]
 
@@ -218,13 +205,9 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 def run_workflow_from_file(filename: str, llm):
     node_map = load_nodes_from_json(filename)
 
-    # Tool nodes for lookup
-    tool_nodes = find_nodes_by_type(node_map, "TOOL")
-    tool_map = {tool_node.name: tool_node.description for tool_node in tool_nodes}
-
-    for tool in tool_nodes:
+    # Register the tool functions dynamically
+    for tool in find_nodes_by_type(node_map, "TOOL"):
         tool_code = f"{tool.description}"
-        # Register the tool function dynamically
         exec(tool_code, globals())
 
     RunWorkFlow(node_map, llm)

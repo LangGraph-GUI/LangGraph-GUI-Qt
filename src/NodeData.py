@@ -27,20 +27,15 @@ class NodeData(Serializable):
     prevs: List[int] = field(default_factory=list)
 
     # LangGraph attribute
-    # "START", "AGENT", "TASK", "STEP", "TEAM", "TOOL", "CONDITION"
+    # "START", "STEP", "TOOL", "CONDITION"
     type: str = "START"
 
     # AGENT
     name: str = ""
     description: str = ""
 
-    # TASK
-    team: str = ""
-
     # STEP
-    agent: str = ""
     tool: str = ""
-    task: str = ""
     output_var: str = ""
 
     # CONDITION
