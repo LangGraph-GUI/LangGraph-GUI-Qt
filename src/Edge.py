@@ -41,7 +41,7 @@ class Edge(QGraphicsPathItem):
         self.destination_id = destination_port.parentItem().data.uniq_id
         self.update_position()
         source_node = self.source_port.parentItem().data
-        dest_node = self.destination_port.parentItem().data
+        dest_node = self.destination_port.parentItem()
         source_node.nexts.append(self.destination_id)
         dest_node.prevs.append(self.source_id)  # Add to prevs
 
@@ -52,8 +52,8 @@ class Edge(QGraphicsPathItem):
             self.destination_port.edges.remove(self)
         if self.destination_id in self.source_port.parentItem().data.nexts:
             self.source_port.parentItem().data.nexts.remove(self.destination_id)
-        if self.source_id in self.destination_port.parentItem().data.prevs:
-            self.destination_port.parentItem().data.prevs.remove(self.source_id)  # Remove from prevs
+        if self.source_id in self.destination_port.parentItem().prevs:
+            self.destination_port.parentItem().prevs.remove(self.source_id)  # Remove from prevs
         self.scene().removeItem(self)
         
     def hoverEnterEvent(self, event):

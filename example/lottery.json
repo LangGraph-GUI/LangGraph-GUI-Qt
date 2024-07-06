@@ -9,18 +9,13 @@
             "nexts": [
                 "uniq_id_3"
             ],
-            "prevs": [],
             "type": "STEP",
             "name": "Node",
             "description": "output:\" fail, buy again\"",
             "tool": "",
             "output_var": "",
             "true_next": null,
-            "false_next": null,
-            "true_prevs": [],
-            "false_prevs": [
-                "uniq_id_2"
-            ]
+            "false_next": null
         },
         {
             "uniq_id": "uniq_id_4",
@@ -29,18 +24,13 @@
             "width": 306.0,
             "height": 385.0,
             "nexts": [],
-            "prevs": [],
             "type": "STEP",
             "name": "Node",
             "description": "output: \"You Win! GO home\"",
             "tool": "",
             "output_var": "",
             "true_next": null,
-            "false_next": null,
-            "true_prevs": [
-                "uniq_id_2"
-            ],
-            "false_prevs": []
+            "false_next": null
         },
         {
             "uniq_id": "uniq_id_3",
@@ -51,19 +41,13 @@
             "nexts": [
                 "uniq_id_2"
             ],
-            "prevs": [
-                "uniq_id_1",
-                "uniq_id_5"
-            ],
             "type": "STEP",
             "name": "Buy lottery",
             "description": "Buy a lottery ticket by a random numbe between 2 to twenty one. just give me a number",
             "tool": "",
             "output_var": "",
             "true_next": null,
-            "false_next": null,
-            "true_prevs": [],
-            "false_prevs": []
+            "false_next": null
         },
         {
             "uniq_id": "uniq_id_2",
@@ -72,18 +56,13 @@
             "width": 326.0,
             "height": 279.0,
             "nexts": [],
-            "prevs": [
-                "uniq_id_3"
-            ],
             "type": "CONDITION",
             "name": "Check Prize",
             "description": "check the number, \nif larger than 10, shows win, \notherwise, fail",
             "tool": "",
             "output_var": "",
             "true_next": "uniq_id_4",
-            "false_next": "uniq_id_5",
-            "true_prevs": [],
-            "false_prevs": []
+            "false_next": "uniq_id_5"
         },
         {
             "uniq_id": "uniq_id_1",
@@ -94,16 +73,13 @@
             "nexts": [
                 "uniq_id_3"
             ],
-            "prevs": [],
             "type": "START",
             "name": "Node",
             "description": "",
             "tool": "",
             "output_var": "",
             "true_next": null,
-            "false_next": null,
-            "true_prevs": [],
-            "false_prevs": []
+            "false_next": null
         }
     ],
     "node_counter": 7

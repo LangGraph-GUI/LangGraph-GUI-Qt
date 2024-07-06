@@ -44,7 +44,7 @@ class ConditionEdge(QGraphicsPathItem):
         self.destination_id = destination_port.parentItem().data.uniq_id
         self.update_position()
         source_node = self.source_port.parentItem().data
-        dest_node = self.destination_port.parentItem().data
+        dest_node = self.destination_port.parentItem()
         
         if self.condition_type == "true":
             source_node.true_next = self.destination_id
@@ -59,7 +59,7 @@ class ConditionEdge(QGraphicsPathItem):
         if self in self.destination_port.edges:
             self.destination_port.edges.remove(self)
         source_node = self.source_port.parentItem().data
-        dest_node = self.destination_port.parentItem().data
+        dest_node = self.destination_port.parentItem()
         if self.condition_type == "true":
             if self.destination_id == source_node.true_next:
                 source_node.true_next = None

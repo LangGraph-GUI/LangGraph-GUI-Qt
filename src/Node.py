@@ -23,6 +23,12 @@ class Node(QGraphicsItem):
         self.input_port = Port(self, QPointF(0, 25), "input")
         self.output_port = Port(self, QPointF(self.rect.width(), 25), "output")
         self.setZValue(0)  # Set a lower ZValue for nodes
+        
+        # for remove concated nodes info
+        self.prevs = []
+        self.true_prevs = []
+        self.false_prevs = []
+
 
 
         # Add true and false ports for condition nodes
@@ -58,15 +64,15 @@ class Node(QGraphicsItem):
     def remove_normal_edges(self):
         for edge in self.output_port.edges[:]:
             edge.remove()
-        for prev_id in self.data.prevs[:]:
+        for prev_id in self.prevs[:]:
             prev_node = self.scene().get_node_by_id(prev_id)
             if prev_node and self.data.uniq_id in prev_node.data.nexts:
                 prev_node.data.nexts.remove(self.data.uniq_id)
 
         for next_id in self.data.nexts[:]:
             next_node = self.scene().get_node_by_id(next_id)
-            if next_node and self.data.uniq_id in next_node.data.prevs:
-                next_node.data.prevs.remove(self.data.uniq_id)
+            if next_node and self.data.uniq_id in next_node.prevs:
+                next_node.prevs.remove(self.data.uniq_id)
 
     def remove_condition_edges(self):
         for edge in self.true_port.edges[:]:
