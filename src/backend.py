@@ -27,7 +27,7 @@ def main():
         llm = ChatOpenAI(temperature=0.7, model_name="gpt-4o")
     elif args.llm:
         os.environ["OPENAI_API_KEY"] = "sk-proj-not-use-it"
-        llm = Ollama(model=args.llm)
+        llm = Ollama(model=args.llm, format="json", temperature=0)
 
     run_workflow_from_file(args.graph, llm)
 
