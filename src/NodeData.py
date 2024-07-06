@@ -24,7 +24,6 @@ class NodeData(Serializable):
 
 
     nexts: List[int] = field(default_factory=list)
-    prevs: List[int] = field(default_factory=list)
 
     # LangGraph attribute
     # "START", "STEP", "TOOL", "CONDITION"
@@ -41,8 +40,6 @@ class NodeData(Serializable):
     # CONDITION
     true_next: Optional[int] = None
     false_next: Optional[int] = None
-    true_prevs: List[int] = field(default_factory=list)
-    false_prevs: List[int] = field(default_factory=list)
 
 
     def to_dict(self):

@@ -12,6 +12,7 @@ class Tee:
         message_with_timestamp = f"{timestamp} - {message}"
         self.stdout.write("\n")
         self.stdout.write(message_with_timestamp)
+        self.file.write("\n")
         self.file.write(message_with_timestamp)
         self.file.flush()
 
