@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - but in layout
 - pass llm from argc
+- json format
+
+### Feature
+- print current working node name
 
 ## [0.5.2] - 2024-07-04
 ### Fixed
