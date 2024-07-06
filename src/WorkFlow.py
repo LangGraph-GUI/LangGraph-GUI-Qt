@@ -24,10 +24,6 @@ def tool(func: Callable) -> Callable:
     tool_info_registry[func.__name__] = tool_info
     return func
 
-# Load local language model
-local_llm = "mistral"
-llm = ChatOllama(model=local_llm, format="json", temperature=0)
-
 def load_nodes_from_json(filename: str) -> Dict[str, NodeData]:
     with open(filename, 'r') as file:
         data = json.load(file)
@@ -40,8 +36,8 @@ def load_nodes_from_json(filename: str) -> Dict[str, NodeData]:
 def find_nodes_by_type(node_map: Dict[str, NodeData], node_type: str) -> List[NodeData]:
     return [node for node in node_map.values() if node.type == node_type]
 
-# Clip the history to the last 8000 characters
-def clip_history(history: str, max_chars: int = 8000) -> str:
+# Clip the history to the last 16000 characters
+def clip_history(history: str, max_chars: int = 16000) -> str:
     if len(history) > max_chars:
         return history[-max_chars:]
     return history
@@ -51,7 +47,7 @@ class PipelineState(TypedDict):
     task: Annotated[str, operator.add]
     condition: Annotated[bool, ""]
 
-def execute_task(state: PipelineState, prompt_template: str) -> PipelineState:
+def execute_task(state: PipelineState, prompt_template: str, llm) -> PipelineState:
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
@@ -67,7 +63,7 @@ def execute_task(state: PipelineState, prompt_template: str) -> PipelineState:
 
     return state
 
-def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
+def execute_tool(state: PipelineState, prompt_template: str, llm) -> PipelineState:
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
@@ -92,7 +88,7 @@ def execute_tool(state: PipelineState, prompt_template: str) -> PipelineState:
 
     return state
 
-def condition_switch(state: PipelineState, prompt_template: str) -> PipelineState:
+def condition_switch(state: PipelineState, prompt_template: str, llm) -> PipelineState:
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
@@ -135,11 +131,11 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             Based on the history, choose the appropriate tool and arguments in the json format:
             "function": "<function>", "args": [<arg1>, <arg2>, ...]
 
-            next stage directly parse then run <function>(<arg1>,<arg2>, ...) make sure syntax can run
+            next stage directly parse then run <function>(<arg1>,<arg2>, ...) make sure syntax is right json can run
             """
             workflow.add_node(
                 current_node.uniq_id, 
-                lambda state, template=prompt_template: execute_tool(state, template)
+                lambda state, template=prompt_template, llm=llm: execute_tool(state, template, llm)
             )
         else:
             prompt_template=f"""
@@ -148,7 +144,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             """
             workflow.add_node(
                 current_node.uniq_id, 
-                lambda state, template=prompt_template: execute_task(state, template)
+                lambda state, template=prompt_template, llm=llm: execute_task(state, template, llm)
             )
 
     # Edges
@@ -177,7 +173,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         """
         workflow.add_node(
             condition.uniq_id, 
-            lambda state, template=condition_template: condition_switch(state, template)
+            lambda state, template=condition_template, llm=llm: condition_switch(state, template, llm)
         )
 
         print(f"{condition.name} {condition.uniq_id}'s condition")
@@ -211,4 +207,3 @@ def run_workflow_from_file(filename: str, llm):
         exec(tool_code, globals())
 
     RunWorkFlow(node_map, llm)
-

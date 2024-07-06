@@ -40,9 +40,6 @@ class Slot:
         elif isinstance(self.edit, QLineEdit):
             setattr(self.parent.data, self.data_attr, self.edit.text())
 
-        # Trigger parent update
-        self.parent.update_node()
-
     def show(self):
         self.label.show()
         self.edit.show()
