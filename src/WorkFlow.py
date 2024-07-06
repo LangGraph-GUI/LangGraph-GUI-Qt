@@ -2,6 +2,8 @@
 
 import os
 import json
+import re
+
 from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal
 import operator
 import inspect
@@ -47,7 +49,8 @@ class PipelineState(TypedDict):
     task: Annotated[str, operator.add]
     condition: Annotated[bool, ""]
 
-def execute_task(state: PipelineState, prompt_template: str, llm) -> PipelineState:
+def execute_task(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
+    print(f"{name} is working...")
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
@@ -56,14 +59,15 @@ def execute_task(state: PipelineState, prompt_template: str, llm) -> PipelineSta
     generation = llm_chain.invoke(inputs)
     data = json.loads(generation)
     
-    print(data)
-
     state["history"] += "\n" + json.dumps(data)
     state["history"] = clip_history(state["history"])
 
     return state
 
-def execute_tool(state: PipelineState, prompt_template: str, llm) -> PipelineState:
+def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
+
+    print(f"{name} is working...")
+
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
@@ -71,7 +75,12 @@ def execute_tool(state: PipelineState, prompt_template: str, llm) -> PipelineSta
     inputs = {"history": state["history"]}
     generation = llm_chain.invoke(inputs)
 
-    data = json.loads(generation)
+    # Sanitize the generation output by removing invalid control characters
+    sanitized_generation = re.sub(r'[\x00-\x1F\x7F]', '', generation)
+
+    print(sanitized_generation)
+
+    data = json.loads(sanitized_generation)
     
     choice = data
     tool_name = choice["function"]
@@ -81,14 +90,18 @@ def execute_tool(state: PipelineState, prompt_template: str, llm) -> PipelineSta
         raise ValueError(f"Tool {tool_name} not found in registry.")
     
     result = tool_registry[tool_name](*args)
-    print(data)
-    print(f"result: {result}")
-    state["history"] += f"\nExecuted {tool_name} with result: {result}"
+
+    # Flatten args to a string
+    flattened_args = ', '.join(map(str, args))
+
+    state["history"] += f"\nExecuted {tool_name}({flattened_args})  Result is: {result}"
     state["history"] = clip_history(state["history"])
 
     return state
 
-def condition_switch(state: PipelineState, prompt_template: str, llm) -> PipelineState:
+def condition_switch(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
+    print(f"{name} is working...")
+
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
@@ -98,8 +111,6 @@ def condition_switch(state: PipelineState, prompt_template: str, llm) -> Pipelin
 
     data = json.loads(generation)
     
-    print(data)
-
     condition = data["switch"]
     state["condition"] = condition
     
@@ -135,7 +146,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             """
             workflow.add_node(
                 current_node.uniq_id, 
-                lambda state, template=prompt_template, llm=llm: execute_tool(state, template, llm)
+                lambda state, template=prompt_template, llm=llm, name=current_node.name : execute_tool(name, state, template, llm)
             )
         else:
             prompt_template=f"""
@@ -144,7 +155,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             """
             workflow.add_node(
                 current_node.uniq_id, 
-                lambda state, template=prompt_template, llm=llm: execute_task(state, template, llm)
+                lambda state, template=prompt_template, llm=llm, name=current_node.name: execute_task(name, state, template, llm)
             )
 
     # Edges
@@ -173,7 +184,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         """
         workflow.add_node(
             condition.uniq_id, 
-            lambda state, template=condition_template, llm=llm: condition_switch(state, template, llm)
+            lambda state, template=condition_template, llm=llm, name=condition.name: condition_switch(name, state, template, llm)
         )
 
         print(f"{condition.name} {condition.uniq_id}'s condition")
