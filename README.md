@@ -4,8 +4,9 @@ LangGraph-GUI is a user-friendly interface for managing and visualizing Node-Edg
 
 This is node-edge based gui will export to json for better decoupling.
 
-![LangGraph-GUI](cover.webp)
+*If you want to learn more about LangGraph, we have LangGraph for dummy : [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn)*
 
+![LangGraph-GUI](cover.webp)
 
 ## Explanation
 
@@ -38,10 +39,6 @@ CONDITION node will mapping to LangGraph conditional_edge
 * red edge is false case path
 
 ![](images/condition.webp)
-
-### Other Resource
-If you want to learn more about LangGraph, we have LangGraph for dummy : [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn)
-
 
 ## Environment Setup
 
