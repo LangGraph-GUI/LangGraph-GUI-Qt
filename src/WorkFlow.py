@@ -47,7 +47,7 @@ def clip_history(history: str, max_chars: int = 16000) -> str:
 class PipelineState(TypedDict):
     history: Annotated[str, operator.add]
     task: Annotated[str, operator.add]
-    condition: Annotated[bool, ""]
+    condition: Annotated[bool, lambda x, y: x & y]
 
 def execute_task(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
     print(f"{name} is working...")
