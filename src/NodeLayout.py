@@ -72,12 +72,8 @@ class NodeLayout(QGraphicsItem):
         # Initialize slots
         self.slots = {}
         self.add_slot("name", QLineEdit)
-
-
-        # Step
         self.add_slot("tool", QLineEdit)
         self.add_slot("description", QTextEdit)
-        self.add_slot("output_var", QLineEdit)
         
         self.proxy_widget = QGraphicsProxyWidget(self)
         self.proxy_widget.setWidget(self.container_widget)
@@ -130,7 +126,6 @@ class NodeLayout(QGraphicsItem):
             self.slots["name"].show()
             self.slots["tool"].show()
             self.slots["description"].show()
-            self.slots["output_var"].show()
 
         # Update geometry after setting visibility
         self.update_proxy_widget_geometry()

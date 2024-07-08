@@ -47,9 +47,9 @@ def clip_history(history: str, max_chars: int = 16000) -> str:
 class PipelineState(TypedDict):
     history: Annotated[str, operator.add]
     task: Annotated[str, operator.add]
-    condition: Annotated[bool, lambda x, y: x & y]
+    condition: Annotated[bool, lambda x, y: y]
 
-def execute_task(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
+def execute_step(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
     print(f"{name} is working...")
     state["history"] = clip_history(state["history"])
     
@@ -94,6 +94,9 @@ def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> 
     # Flatten args to a string
     flattened_args = ', '.join(map(str, args))
 
+    print(f"\nExecuted Tool: {tool_name}({flattened_args})  Result is: {result}")
+
+
     state["history"] += f"\nExecuted {tool_name}({flattened_args})  Result is: {result}"
     state["history"] = clip_history(state["history"])
 
@@ -114,13 +117,16 @@ def condition_switch(name:str, state: PipelineState, prompt_template: str, llm) 
     condition = data["switch"]
     state["condition"] = condition
     
-    state["history"] += f"\nResult is {condition}"
+    state["history"] += f"\nCondition is {condition}"
     state["history"] = clip_history(state["history"])
 
     return state
 
 def conditional_edge(state: PipelineState) -> Literal["True", "False"]:
-    return "True" if state["condition"] == True else "False"
+    if state["condition"] in ["True", "true", True]:
+        return "True"
+    else:
+        return "False"
 
 def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     # Define the state machine
@@ -139,10 +145,10 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             history: {{history}}
             {current_node.description}
             Available tool: {tool_info}
-            Based on the history, choose the appropriate tool and arguments in the json format:
-            "function": "<function>", "args": [<arg1>, <arg2>, ...]
+            Based on Available tool, arguments in the json format:
+            "function": "<func_name>", "args": [<arg1>, <arg2>, ...]
 
-            next stage directly parse then run <function>(<arg1>,<arg2>, ...) make sure syntax is right json can run
+            next stage directly parse then run <func_name>(<arg1>,<arg2>, ...) make sure syntax is right json and align function siganture
             """
             workflow.add_node(
                 current_node.uniq_id, 
@@ -155,7 +161,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             """
             workflow.add_node(
                 current_node.uniq_id, 
-                lambda state, template=prompt_template, llm=llm, name=current_node.name: execute_task(name, state, template, llm)
+                lambda state, template=prompt_template, llm=llm, name=current_node.name: execute_step(name, state, template, llm)
             )
 
     # Edges

@@ -35,7 +35,6 @@ class NodeData(Serializable):
 
     # STEP
     tool: str = ""
-    output_var: str = ""
 
     # CONDITION
     true_next: Optional[int] = None
