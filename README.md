@@ -74,7 +74,7 @@ ollama serve
 ```
 Then run the back-end locally with a model such mistral, use:
 ```bash
-python backend.py --graph example.json --llm mistral --tee output.log
+python backend.py --graph example.json --llm gemma2 --tee output.log
 ```
 This command will parse the specified JSON file into Graph.
 
