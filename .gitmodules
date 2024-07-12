@@ -1,0 +1,4 @@
+[submodule "examples"]
+	path = examples
+	url = ../examples.git
+	branch = main
