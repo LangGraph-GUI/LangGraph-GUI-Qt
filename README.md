@@ -1,10 +1,10 @@
 # LangGraph-GUI-backend
 
-This repository provides the backend for [LangGraph-GUI-Qt](../LangGraph-GUI-Qt) and [LangGraph-GUI-ReactFlow](../LangGraph-GUI).
+This repository provides the backend for [LangGraph-GUI-Qt](../../LangGraph-GUI-Qt) and [LangGraph-GUI-ReactFlow](../../LangGraph-GUI).
 
 The backend supports running workflows locally using language models by Ollama.
 
-*For a beginner-friendly introduction to LangGraph, visit [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn).*
+*For a beginner-friendly introduction to LangGraph, visit [LangGraph-learn](../../LangGraph-learn).*
 
 ## Environment Setup
 
