@@ -1,6 +1,6 @@
 # server.py
 
-from flask import Flask, Response, stream_with_context, request
+from flask import Flask, Response, stream_with_context, request, jsonify
 from flask_cors import CORS
 import time
 from ServerTee import ServerTee
@@ -49,6 +49,11 @@ def stop_script():
         return "Script stopped", 200
     else:
         return "No script is running", 400
+
+@app.route('/status', methods=['GET'])
+def check_status():
+    running = thread_handler.is_running()
+    return jsonify({"running": running}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
