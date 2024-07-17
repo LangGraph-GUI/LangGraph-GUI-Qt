@@ -1,39 +1,20 @@
 # server.py
 
-from flask import Flask, Response, stream_with_context, request, jsonify, send_file
+from flask import Flask, Response, stream_with_context, request, jsonify
 from flask_cors import CORS
 import os
 from ServerTee import ServerTee
 from thread_handler import ThreadHandler
 from WorkFlow import run_workflow_as_server
+from FileTransmit import file_transmit_bp  # Import the Blueprint
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 
+app.register_blueprint(file_transmit_bp)  # Register the Blueprint
+
 server_tee = ServerTee("server.log")
 thread_handler = ThreadHandler.get_instance()
-
-# Define the workspace directory
-WORKSPACE_FOLDER = 'workspace'
-if not os.path.exists(WORKSPACE_FOLDER):
-    os.makedirs(WORKSPACE_FOLDER)
-
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected for uploading'}), 400
-    file.save(os.path.join(WORKSPACE_FOLDER, file.filename))
-    return jsonify({'message': 'File successfully uploaded'}), 200
-
-@app.route('/download/<filename>', methods=['GET'])
-def download_file(filename):
-    file_path = os.path.join(WORKSPACE_FOLDER, filename)
-    if os.path.exists(file_path):
-        return send_file(file_path, as_attachment=True)
-    return jsonify({'error': 'File not found'}), 404
 
 def server_func():
     run_workflow_as_server()
