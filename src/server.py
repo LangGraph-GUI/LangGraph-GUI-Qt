@@ -17,7 +17,11 @@ server_tee = ServerTee("server.log")
 thread_handler = ThreadHandler.get_instance()
 
 def server_func():
-    run_workflow_as_server()
+    try:
+        run_workflow_as_server()
+    except Exception as e:
+        print(str(e))
+        raise
 
 @app.route('/run', methods=['POST'])
 def run_script():
@@ -30,8 +34,10 @@ def run_script():
             yield from server_tee.stream_to_frontend()
         except Exception as e:
             print(str(e))
+            yield "Error occurred: " + str(e)
         finally:
-            thread_handler.force_reset()
+            if not thread_handler.is_running():
+                yield "finished"
 
     return Response(stream_with_context(generate()), content_type='text/plain; charset=utf-8')
 
