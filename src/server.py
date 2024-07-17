@@ -5,6 +5,7 @@ from flask_cors import CORS
 import time
 from ServerTee import ServerTee
 from thread_handler import ThreadHandler
+from WorkFlow import run_workflow_as_server
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
@@ -12,12 +13,8 @@ CORS(app)  # This will enable CORS for all routes
 server_tee = ServerTee("server.log")
 thread_handler = ThreadHandler.get_instance()
 
-def hello_world_function():
-    print("hello_world_function called")
-    for i in range(10):
-        print(f"Message {i}")
-        time.sleep(1)
-    print("Oh my god!")
+def server_func():
+    run_workflow_as_server()
 
 @app.route('/run', methods=['POST'])
 def run_script():
@@ -28,7 +25,7 @@ def run_script():
 
     def generate():
         try:
-            thread_handler.start_thread(target=hello_world_function)
+            thread_handler.start_thread(target=server_func)
             yield from server_tee.stream_to_frontend()
         except Exception as e:
             print(str(e))

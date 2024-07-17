@@ -9,6 +9,7 @@ import operator
 import inspect
 from NodeData import NodeData
 from langchain_community.chat_models import ChatOllama
+from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langgraph.graph import StateGraph, END, START
@@ -226,7 +227,7 @@ def run_workflow_from_file(filename: str, llm):
     RunWorkFlow(node_map, llm)
 
 def run_workflow_as_server():
-    node_map = load_nodes_from_json(graph.json)
+    node_map = load_nodes_from_json("graph.json")
 
     # Register the tool functions dynamically
     for tool in find_nodes_by_type(node_map, "TOOL"):
