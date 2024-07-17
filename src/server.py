@@ -12,12 +12,9 @@ CORS(app)  # This will enable CORS for all routes
 server_tee = ServerTee("server.log")
 thread_handler = ThreadHandler.get_instance()
 
-def hello_world_function(stop_event):
+def hello_world_function():
     print("hello_world_function called")
     for i in range(10):
-        if stop_event.is_set():
-            print("Script stopped by user.")
-            break
         print(f"Message {i}")
         time.sleep(1)
     print("Oh my god!")
@@ -31,7 +28,7 @@ def run_script():
 
     def generate():
         try:
-            thread_handler.start_thread(target=lambda: hello_world_function(thread_handler.stop_event))
+            thread_handler.start_thread(target=hello_world_function)
             yield from server_tee.stream_to_frontend()
         except Exception as e:
             print(str(e))
