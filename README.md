@@ -40,5 +40,7 @@ This command will parse the specified JSON file into LangGraph components and ex
 
 For reactflow frontend, up the server
 ```bash
-python server.py
+mkdir src/workspace
+cd src/workspace
+python ../server.py
 ```

@@ -9,7 +9,7 @@ from datetime import datetime
 file_transmit_bp = Blueprint('file_transmit', __name__)
 
 # Define the workspace directory
-WORKSPACE_FOLDER = 'workspace'
+WORKSPACE_FOLDER = './'
 if not os.path.exists(WORKSPACE_FOLDER):
     os.makedirs(WORKSPACE_FOLDER)
 
