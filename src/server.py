@@ -3,19 +3,16 @@
 from flask import Flask, Response, stream_with_context, request
 from flask_cors import CORS
 import time
-import threading
 from ServerTee import ServerTee
+from thread_handler import ThreadHandler
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 
 server_tee = ServerTee("server.log")
+thread_handler = ThreadHandler.get_instance()
 
-lock = threading.Lock()
-current_thread = None
-stop_event = threading.Event()
-
-def hello_world_function():
+def hello_world_function(stop_event):
     print("hello_world_function called")
     for i in range(10):
         if stop_event.is_set():
@@ -27,30 +24,28 @@ def hello_world_function():
 
 @app.route('/run', methods=['POST'])
 def run_script():
-    global current_thread, stop_event
     print("Received request at /run endpoint")
-    
-    if lock.locked():
+
+    if thread_handler.is_running():
         return "Another instance is already running", 409
 
     def generate():
-        global current_thread
-        with lock:
-            stop_event.clear()
-            current_thread = threading.Thread(target=hello_world_function)
-            current_thread.start()
+        try:
+            thread_handler.start_thread(target=lambda: hello_world_function(thread_handler.stop_event))
             yield from server_tee.stream_to_frontend()
-            current_thread.join()
+        except Exception as e:
+            print(str(e))
+        finally:
+            thread_handler.force_reset()
 
     return Response(stream_with_context(generate()), content_type='text/plain; charset=utf-8')
 
 @app.route('/stop', methods=['POST'])
 def stop_script():
-    global current_thread, stop_event
     print("Received request to stop script")
-    if lock.locked():
-        stop_event.set()
-        current_thread.join()
+
+    if thread_handler.is_running():
+        thread_handler.force_reset()
         return "Script stopped", 200
     else:
         return "No script is running", 400
