@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.5.5] - 2024-07-17
-### Working
+### Feature
 - streaming to frontend
+- upload/download files
 
 ## [0.5.4] - 2024-07-08
 ### Fixed

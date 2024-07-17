@@ -29,7 +29,7 @@ ollama serve
 
 ### LangGraph-GUI-Qt
 
-For Qt part, run the backend with a model such as Mistral, use the following command in another terminal:
+For Qt frontend, run the backend with a model such as Mistral, use the following command in another terminal:
 ```bash
 python backend.py --graph example.json --llm gemma2 --tee output.log
 ```
@@ -38,7 +38,7 @@ This command will parse the specified JSON file into LangGraph components and ex
 
 ### LangGraph-GUI-ReactFlow
 
-For reactflow part, up the server
+For reactflow frontend, up the server
 ```bash
 python server.py
 ```

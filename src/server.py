@@ -13,7 +13,7 @@ CORS(app)  # This will enable CORS for all routes
 
 app.register_blueprint(file_transmit_bp)  # Register the Blueprint
 
-server_tee = ServerTee("server.log")
+server_tee = ServerTee("workspace/server.log")
 thread_handler = ThreadHandler.get_instance()
 
 def server_func():
