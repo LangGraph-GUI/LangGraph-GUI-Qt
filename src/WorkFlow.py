@@ -224,3 +224,15 @@ def run_workflow_from_file(filename: str, llm):
         exec(tool_code, globals())
 
     RunWorkFlow(node_map, llm)
+
+def run_workflow_as_server():
+    node_map = load_nodes_from_json(graph.json)
+
+    # Register the tool functions dynamically
+    for tool in find_nodes_by_type(node_map, "TOOL"):
+        tool_code = f"{tool.description}"
+        exec(tool_code, globals())
+
+    llm = Ollama(model="gemma2", format="json", temperature=0)
+
+    RunWorkFlow(node_map, llm)

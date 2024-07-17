@@ -10,8 +10,15 @@ The backend supports running workflows locally using language models by Ollama.
 
 To install the required dependencies for LangGraph, run:
 ```bash
-pip install langchain langchain-community langchain-core langgraph
+pip install langchain langchain-community langchain-core langgraph 
 ```
+
+To install required for backend, run:
+
+```bash
+pip install Flask Flask-CORS
+```
+
 
 ## Running the Application
 
@@ -20,10 +27,18 @@ To run a local language model, first start Ollama in a separate terminal:
 ollama serve
 ```
 
-Then, to run the backend with a model such as Mistral, use the following command in another terminal:
+### LangGraph-GUI-Qt
+
+For Qt part, run the backend with a model such as Mistral, use the following command in another terminal:
 ```bash
 python backend.py --graph example.json --llm gemma2 --tee output.log
 ```
 
 This command will parse the specified JSON file into LangGraph components and execute result.
 
+### LangGraph-GUI-ReactFlow
+
+For reactflow part, up the server
+```bash
+python server.py
+```
