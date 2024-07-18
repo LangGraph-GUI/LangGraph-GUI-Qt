@@ -4,6 +4,8 @@ This repository provides the backend for [LangGraph-GUI-Qt](https://github.com/L
 
 The backend supports running workflows locally using language models by Ollama.
 
+*This is LangGraph-GUI backend, If you want to run in docker compose, see [LangGraph-GUI-App](https://github.com/LangGraph-GUI/LangGraph-GUI-App)*
+
 *For a beginner-friendly introduction to LangGraph, visit [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn).*
 
 ## Environment Setup
