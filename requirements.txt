@@ -4,3 +4,4 @@ langchain-core
 langgraph
 Flask
 Flask-CORS
+httpx
