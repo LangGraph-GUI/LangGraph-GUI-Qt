@@ -8,17 +8,10 @@ The backend supports running workflows locally using language models by Ollama.
 
 ## Environment Setup
 
-To install the required dependencies for LangGraph, run:
+To install the required dependencies for LangGraph and server, run:
 ```bash
-pip install langchain langchain-community langchain-core langgraph 
+pip install -r requirements.txt
 ```
-
-To install required for backend, run:
-
-```bash
-pip install Flask Flask-CORS
-```
-
 
 ## Running the Application
 
