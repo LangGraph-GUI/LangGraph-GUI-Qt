@@ -216,16 +216,6 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     for state in app.stream(initial_state):
         print(state)
 
-def run_workflow_from_file(filename: str, llm):
-    node_map = load_nodes_from_json(filename)
-
-    # Register the tool functions dynamically
-    for tool in find_nodes_by_type(node_map, "TOOL"):
-        tool_code = f"{tool.description}"
-        exec(tool_code, globals())
-
-    RunWorkFlow(node_map, llm)
-
 def run_workflow_as_server():
     node_map = load_nodes_from_json("graph.json")
 
