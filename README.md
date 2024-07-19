@@ -2,7 +2,8 @@
 
 LangGraph-GUI is a user-friendly interface for managing and visualizing Node-Edge workflows with LangGraph. It supports creating, editing, and running workflows locally using language models by Ollama .
 
-This is node-edge based gui will export to json for better decoupling.
+This is node-edge based gui will export to json as saved graph. To execute json by LangGraph, you need to run [LangGraph-GUI-backend](https://github.com/LangGraph-GUI/LangGraph-GUI-backend?tab=readme-ov-file#langgraph-gui-qt)
+
 This repo is implemented with Qt. If you want  ReactFlow version frontend, see [LangGraph-GUI-ReactFlow](https://github.com/LangGraph-GUI/LangGraph-GUI)
 
 
