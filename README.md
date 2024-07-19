@@ -2,14 +2,13 @@
 
 LangGraph-GUI is a user-friendly interface for managing and visualizing Node-Edge workflows with LangGraph. It supports creating, editing, and running workflows locally using language models by Ollama .
 
-This is node-edge based gui will export to json as saved graph. To execute json by LangGraph, you need to run [LangGraph-GUI-backend](https://github.com/LangGraph-GUI/LangGraph-GUI-backend)
-
+This is node-edge based gui will export to json for better decoupling.
 This repo is implemented with Qt. If you want  ReactFlow version frontend, see [LangGraph-GUI-ReactFlow](https://github.com/LangGraph-GUI/LangGraph-GUI)
 
 
 *If you want to learn more about LangGraph, we have LangGraph for dummy : [LangGraph-learn](https://github.com/LangGraph-GUI/LangGraph-learn)*
 
-![LangGraph-GUI](cover.webp)
+![LangGraph-GUI-Qt](cover.webp)
 
 ## Explanation
 
@@ -51,18 +50,40 @@ To install the required dependencies for the front-end GUI, run:
 ```bash
 pip install PySide6
 ```
+### Back-End
+
+To install the required dependencies for the LangGraph, run:
+```bash
+pip install langchain langchain-community langchain-core langgraph
+```
 
 
 ## Running the Application
 
+### Front-End
+
 To start the front-end GUI, execute:
 ```bash
-python main.py
+python frontend.py
 ```
 This will allow you to read and write JSON files representing DAG workflows for CrewAI.
 
+### Back-End
+
+If want to run local llm, need run Ollama first
+```bash
+ollama serve
+```
+Then run the back-end locally with a model such mistral, use:
+```bash
+python backend.py --graph example.json --llm gemma2 --tee output.log
+```
+This command will parse the specified JSON file into Graph.
+
 
 ## Building the Application
+
+### Front-End GUI
 
 To build the front-end GUI into a standalone executable, follow these steps:
 
@@ -80,4 +101,3 @@ To build the front-end GUI into a standalone executable, follow these steps:
     ```bash
     pyinstaller --onefile --additional-hooks-dir=. frontend.py
     ```
-

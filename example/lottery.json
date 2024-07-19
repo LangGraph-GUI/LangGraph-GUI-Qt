@@ -1,0 +1,81 @@
+{
+    "nodes": [
+        {
+            "uniq_id": "uniq_id_1",
+            "pos_x": -1594.0,
+            "pos_y": -589.0,
+            "width": 200.0,
+            "height": 200.0,
+            "nexts": [
+                "uniq_id_3"
+            ],
+            "type": "START",
+            "name": "Node",
+            "description": "",
+            "tool": "",
+            "true_next": null,
+            "false_next": null
+        },
+        {
+            "uniq_id": "uniq_id_2",
+            "pos_x": -673.0,
+            "pos_y": -726.0,
+            "width": 326.0,
+            "height": 279.0,
+            "nexts": [],
+            "type": "CONDITION",
+            "name": "Check Prize",
+            "description": "check final buy number, \nif larger than 10, shows win, \notherwise, fail",
+            "tool": "",
+            "true_next": "uniq_id_4",
+            "false_next": "uniq_id_5"
+        },
+        {
+            "uniq_id": "uniq_id_3",
+            "pos_x": -1162.0,
+            "pos_y": -382.0,
+            "width": 370.0,
+            "height": 455.0,
+            "nexts": [
+                "uniq_id_2"
+            ],
+            "type": "STEP",
+            "name": "Buy lottery",
+            "description": "Buy a lottery ticket by a random numbe between 2 to twenty one. just give me a number",
+            "tool": "",
+            "true_next": null,
+            "false_next": null
+        },
+        {
+            "uniq_id": "uniq_id_4",
+            "pos_x": -137.0,
+            "pos_y": -814.0,
+            "width": 306.0,
+            "height": 385.0,
+            "nexts": [],
+            "type": "STEP",
+            "name": "Node",
+            "description": "output: \"You Win! GO home\"",
+            "tool": "",
+            "true_next": null,
+            "false_next": null
+        },
+        {
+            "uniq_id": "uniq_id_5",
+            "pos_x": -214.0,
+            "pos_y": -280.0,
+            "width": 200.0,
+            "height": 200.0,
+            "nexts": [
+                "uniq_id_3"
+            ],
+            "type": "STEP",
+            "name": "Node",
+            "description": "output:\" fail, buy again\"",
+            "tool": "",
+            "true_next": null,
+            "false_next": null
+        }
+    ],
+    "node_counter": 7
+}
