@@ -22,15 +22,6 @@ To run a local language model, first start Ollama in a separate terminal:
 ollama serve
 ```
 
-### LangGraph-GUI-Qt
-
-For Qt frontend, run the backend with a model such as Mistral, use the following command in another terminal:
-```bash
-python backend.py --graph example.json --llm gemma2 --tee output.log
-```
-
-This command will parse the specified JSON file into LangGraph components and execute result.
-
 ### LangGraph-GUI-ReactFlow
 
 For reactflow frontend, up the server
@@ -39,3 +30,13 @@ mkdir src/workspace
 cd src/workspace
 python ../server.py
 ```
+
+
+### LangGraph-GUI-Qt
+
+For Qt frontend, run the backend with a model such as Mistral, use the following command in another terminal:
+```bash
+python backend.py --graph example.json --llm gemma2 --tee output.log
+```
+
+This command will parse the specified JSON file into LangGraph components and execute result.
