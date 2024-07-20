@@ -15,13 +15,18 @@ if not os.path.exists(WORKSPACE_FOLDER):
 
 @file_transmit_bp.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected for uploading'}), 400
-    file.save(os.path.join(WORKSPACE_FOLDER, file.filename))
-    return jsonify({'message': 'File successfully uploaded'}), 200
+    if 'files' not in request.files:
+        return jsonify({'error': 'No files part in the request'}), 400
+    files = request.files.getlist('files')
+    if not files:
+        return jsonify({'error': 'No files selected for uploading'}), 400
+
+    for file in files:
+        if file.filename == '':
+            continue
+        file.save(os.path.join(WORKSPACE_FOLDER, file.filename))
+        print(f"upload file: {file.filename}")
+    return jsonify({'message': 'Files successfully uploaded'}), 200
 
 @file_transmit_bp.route('/download', methods=['GET'])
 def download_workspace():
