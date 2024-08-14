@@ -4,9 +4,6 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Create the src/workspace directory
-RUN mkdir -p src/workspace
-
 # Copy all files to the /app directory
 COPY . .
 
