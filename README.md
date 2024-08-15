@@ -1,8 +1,8 @@
 # LangGraph-GUI-backend
 
-The backend supports running LangGraph-GUI workflow json using localLLM such ollama.
+This is old version for langgraph-gui, json format need [examples v0.5.8](https://github.com/LangGraph-GUI/examples/tree/v0.5.8)
 
-For more infomation, please see official site: [LangGraph-GUI.github.io](https://LangGraph-GUI.github.io)
+The backend supports running LangGraph-GUI workflow json using localLLM such ollama.
 
 ## Environment Setup
 

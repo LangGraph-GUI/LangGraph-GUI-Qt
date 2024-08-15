@@ -11,7 +11,7 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # Expose port
-EXPOSE 5000
+# EXPOSE 5000
 
 # Change to the src/workspace directory and run the server
 WORKDIR /app/src/workspace
