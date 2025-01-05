@@ -78,18 +78,16 @@ async def run_script(request: Request, username: str):
         handlers[username] = ProcessHandler()
     
     handler = handlers[username]
-    asyncio.create_task(handler.run(command, user_workspace))
-
-    # stream data
-    def stream_response():
-      for output in handler.get_stream():
-        if isinstance(output, dict):
-            yield f"data: {output}\n\n"  # Send final status
-            return
-        yield f"data: {output}\n\n"
+    # start process in background
+    async def stream_response():
+        asyncio.create_task(handler.run(command, user_workspace)) # start the process as a task
+        async for output in handler.get_stream():
+            if isinstance(output, dict):
+                yield f"data: {output}\n\n"  # Send final status
+                break
+            yield f"data: {output}\n\n"
 
     return StreamingResponse(stream_response(), media_type="text/event-stream")
-
 
 @app.get('/status/{username}')
 async def check_status(username: str):

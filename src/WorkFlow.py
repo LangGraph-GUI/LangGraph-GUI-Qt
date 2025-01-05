@@ -1,16 +1,22 @@
 # WorkFlow.py
 
 import os
-import json
+import sys
 import re
+import json
 from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal
 import operator
 import inspect
+
 from NodeData import NodeData
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langgraph.graph import StateGraph, END, START
 from llm import get_llm, clip_history
+
+def flush_print(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
 
 # Tool registry to hold information about tools
 tool_registry: Dict[str, Callable] = {}
@@ -45,7 +51,7 @@ class PipelineState(TypedDict):
     condition: Annotated[bool, lambda x, y: y]
 
 def execute_step(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
-    print(f"{name} is working...")
+    flush_print(f"{name} is working...")
     state["history"] = clip_history(state["history"])
     
     prompt = PromptTemplate.from_template(prompt_template)
@@ -61,7 +67,7 @@ def execute_step(name:str, state: PipelineState, prompt_template: str, llm) -> P
 
 def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
 
-    print(f"{name} is working...")
+    flush_print(f"{name} is working...")
 
     state["history"] = clip_history(state["history"])
     
@@ -73,7 +79,7 @@ def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> 
     # Sanitize the generation output by removing invalid control characters
     sanitized_generation = re.sub(r'[\x00-\x1F\x7F]', '', generation)
 
-    print(sanitized_generation)
+    flush_print(sanitized_generation)
 
     data = json.loads(sanitized_generation)
     
@@ -89,7 +95,7 @@ def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> 
     # Flatten args to a string
     flattened_args = ', '.join(map(str, args))
 
-    print(f"\nExecuted Tool: {tool_name}({flattened_args})  Result is: {result}")
+    flush_print(f"\nExecuted Tool: {tool_name}({flattened_args})  Result is: {result}")
 
 
     state["history"] += f"\nExecuted {tool_name}({flattened_args})  Result is: {result}"
@@ -98,7 +104,7 @@ def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> 
     return state
 
 def condition_switch(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
-    print(f"{name} is working...")
+    flush_print(f"{name} is working...")
 
     state["history"] = clip_history(state["history"])
     
@@ -118,7 +124,7 @@ def condition_switch(name:str, state: PipelineState, prompt_template: str, llm) 
     return state
 
 def info_add(name: str, state: PipelineState, information: str, llm) -> PipelineState:   
-    print(f"{name} is adding information...")
+    flush_print(f"{name} is adding information...")
 
     # Append the provided information to the history
     state["history"] += "\n" + information
@@ -138,7 +144,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 
     # Start node, only one start point
     start_node = find_nodes_by_type(node_map, "START")[0]
-    print(f"Start root ID: {start_node.uniq_id}")
+    flush_print(f"Start root ID: {start_node.uniq_id}")
 
     # Step nodes
     step_nodes = find_nodes_by_type(node_map, "STEP")
@@ -184,7 +190,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     next_nodes = [node_map[next_id] for next_id in next_node_ids]
     
     for next_node in next_nodes:
-        print(f"Next node ID: {next_node.uniq_id}, Type: {next_node.type}")
+        flush_print(f"Next node ID: {next_node.uniq_id}, Type: {next_node.type}")
         workflow.add_edge(START, next_node.uniq_id)   
 
     # Find all next nodes from step_nodes
@@ -192,7 +198,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         next_nodes = [node_map[next_id] for next_id in node.nexts]
         
         for next_node in next_nodes:
-            print(f"{node.name} {node.uniq_id}'s next node: {next_node.name} {next_node.uniq_id}, Type: {next_node.type}")
+            flush_print(f"{node.name} {node.uniq_id}'s next node: {next_node.name} {next_node.uniq_id}, Type: {next_node.type}")
             workflow.add_edge(node.uniq_id, next_node.uniq_id)
 
     # Find all condition nodes
@@ -207,9 +213,9 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             lambda state, template=condition_template, llm=llm, name=condition.name: condition_switch(name, state, template, llm)
         )
 
-        print(f"{condition.name} {condition.uniq_id}'s condition")
-        print(f"true will go {condition.true_next}")
-        print(f"false will go {condition.false_next}")
+        flush_print(f"{condition.name} {condition.uniq_id}'s condition")
+        flush_print(f"true will go {condition.true_next}")
+        flush_print(f"false will go {condition.false_next}")
         workflow.add_conditional_edges(
             condition.uniq_id,
             conditional_edge,
@@ -227,7 +233,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 
     app = workflow.compile()
     for state in app.stream(initial_state):
-        print(state)
+        flush_print(state)
 
 def run_workflow_as_server(llm):
     node_map = load_nodes_from_json("graph.json")
