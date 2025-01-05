@@ -1,10 +1,12 @@
 # process_handler.py
 
 import asyncio
+from queue import Queue
 
 class ProcessHandler:
     def __init__(self):
         self._process = None
+        self._output_queue = Queue()  # Queue to send output to subscribers
 
     async def run(self, command: list, cwd: str):
         # If a process is already running, return an error
@@ -24,7 +26,10 @@ class ProcessHandler:
                 while True:
                     line = await stream.readline()
                     if line:
-                        print(f"{prefix}{line.decode().strip()}")
+                        message = f"{prefix}{line.decode().strip()}"
+                        print(message)
+                        if prefix == "STDOUT: ": #only add stdout
+                           self._output_queue.put(message)
                     else:
                         break
 
@@ -38,11 +43,14 @@ class ProcessHandler:
             
             # Return final status
             if self._process.returncode == 0:
-                return {"status": "success", "message": "Process completed successfully"}
+                 self._output_queue.put({"status": "success", "message": "Process completed successfully"})
+                 return 
             else:
-                return {"status": "error", "message": f"Process exited with code {self._process.returncode}"}
+                self._output_queue.put({"status": "error", "message": f"Process exited with code {self._process.returncode}"})
+                return 
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            self._output_queue.put({"status": "error", "message": str(e)})
+            return
         finally:
             self._process = None
 
@@ -51,3 +59,16 @@ class ProcessHandler:
         return {
             "is_running": self._process is not None
         }
+
+    def subscribe(self):
+        return self._output_queue  # return the queue for external subscription
+    
+    def get_stream(self):
+         while True:
+             try:
+                output = self._output_queue.get(timeout=0.1)
+                yield output
+             except Exception as e:
+                 if self._process is None: # to close stream
+                   break
+                 continue

@@ -4,11 +4,11 @@ import os
 from datetime import datetime
 import httpx
 from typing import Dict
+import asyncio
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
 
 from ServerTee import ServerTee
 from process_handler import ProcessHandler
@@ -76,8 +76,19 @@ async def run_script(request: Request, username: str):
     # Get or create a handler for the user
     if username not in handlers:
         handlers[username] = ProcessHandler()
+    
+    handler = handlers[username]
+    asyncio.create_task(handler.run(command, user_workspace))
 
-    return await handlers[username].run(command, user_workspace)
+    # stream data
+    def stream_response():
+      for output in handler.get_stream():
+        if isinstance(output, dict):
+            yield f"data: {output}\n\n"  # Send final status
+            return
+        yield f"data: {output}\n\n"
+
+    return StreamingResponse(stream_response(), media_type="text/event-stream")
 
 
 @app.get('/status/{username}')
@@ -88,11 +99,6 @@ async def check_status(username: str):
         return {"running": status["is_running"]}  # Make sure to return running status
     return {"running": False}
 
-
-@app.get('/test/')
-async def test_endpoint():
-    print("helloworlds")  # Prints to the server's console
-    return {"message": "hello world"} # Returns a JSON response
 
 # Include file router
 app.include_router(file_router)
