@@ -104,4 +104,6 @@ app.include_router(file_router)
 # Run the app using Uvicorn
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000, reload=True)
+
+    backend_port = int(os.environ.get("BACKEND_PORT", 5000))  # Default to 5000 if not set
+    uvicorn.run(app, host="0.0.0.0", port=backend_port, reload=True)
