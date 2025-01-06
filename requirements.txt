@@ -5,6 +5,9 @@ langgraph
 fastapi
 uvicorn
 httpx
+
 openai
 pyyaml
 python-multipart
+
+langchain-ollama

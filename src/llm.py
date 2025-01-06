@@ -1,36 +1,59 @@
 # llm.py
 
-from langgraph.graph import Graph
+import os
 
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_community.chat_models import ChatOllama
+
 import json
 
-from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain_community.chat_models import ChatOpenAI
-
-import os
+from pydantic import BaseModel, Field
 
 def get_llm(llm_model, api_key):
+
     if "gpt" in llm_model.lower():  # If the llm contains 'gpt', use ChatOpenAI
+        from langchain_community.chat_models import ChatOpenAI
         os.environ["OPENAI_API_KEY"] = api_key
         llm = ChatOpenAI(temperature=0, model="gpt-4o-mini").bind(response_format={"type": "json_object"})
         print("Using gpt-4o-mini")
 
         return llm
-    
+
+
     if "gemma2" in llm_model.lower():
+        from langchain_ollama import ChatOllama
         ollama_base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")  # Default value if envvar is not set
-        print(f"Initializing ChatOllama with model: gemma2 and base URL: {ollama_base_url}")
         llm = ChatOllama(
             model="gemma2",
             base_url=ollama_base_url,
-            format="json", 
+            format="json",
             temperature=0)
-        
+
+        print("Using gemma2")
         return llm
+
     
+    # cannot work now, need langchain fix error
+    if "gemini" in llm_model.lower():
+        print("langchain not support gemini")
+
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.0-flash-exp", 
+            google_api_key=api_key,
+            format="json"
+            )
+        print("Using gemini-2.0-flash-exp")
+        
+        # Define a Pydantic model for structured output
+        class JsonOutput(BaseModel):
+            """Json response output."""
+            output: dict = Field(description="reply:content")
+
+        # Bind the llm to structured output
+        llm = llm.with_structured_output(JsonOutput)
+        return llm
 
 
 # Clip the history to the last 16000 characters
