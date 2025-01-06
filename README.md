@@ -29,3 +29,7 @@ mkdir src/workspace
 cd src/workspace
 python ../server.py
 ```
+
+## Chnage Log
+
+see: [root repo CHANGELOG](https://github.com/LangGraph-GUI/LangGraph-GUI/blob/main/CHANGELOG.md)

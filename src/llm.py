@@ -12,23 +12,25 @@ from langchain_community.chat_models import ChatOpenAI
 
 import os
 
-def get_llm(llm_model, open_ai_key):
+def get_llm(llm_model, api_key):
     if "gpt" in llm_model.lower():  # If the llm contains 'gpt', use ChatOpenAI
-        os.environ["OPENAI_API_KEY"] = open_ai_key
+        os.environ["OPENAI_API_KEY"] = api_key
         llm = ChatOpenAI(temperature=0, model="gpt-4o-mini").bind(response_format={"type": "json_object"})
         print("Using gpt-4o-mini")
+
+        return llm
     
     if "gemma2" in llm_model.lower():
-        print("Initializing ChatOllama with model: gemma2")
+        ollama_base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")  # Default value if envvar is not set
+        print(f"Initializing ChatOllama with model: gemma2 and base URL: {ollama_base_url}")
         llm = ChatOllama(
             model="gemma2",
-            base_url='http://ollama:13666',
+            base_url=ollama_base_url,
             format="json", 
             temperature=0)
-
-    # Initialize the ChatOllama model with desired parameters
-    return llm
-
+        
+        return llm
+    
 
 
 # Clip the history to the last 16000 characters
