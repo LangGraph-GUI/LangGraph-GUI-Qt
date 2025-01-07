@@ -12,7 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from ServerTee import ServerTee
 from process_handler import ProcessHandler
-
 from FileTransmit import file_router
 
 # log name as today's date in YYYY-MM-DD format

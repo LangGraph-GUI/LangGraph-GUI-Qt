@@ -2,11 +2,22 @@
 
 import os
 import json
+import requests
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+
+from util import flush_print
+
+
+# Clip the history for limited token
+def clip_history(history: str, max_chars: int = 16000) -> str:
+    if len(history) > max_chars:
+        return history[-max_chars:]
+    return history
 
 def get_llm(llm_model, api_key):
 
@@ -14,7 +25,7 @@ def get_llm(llm_model, api_key):
         from langchain_community.chat_models import ChatOpenAI
         os.environ["OPENAI_API_KEY"] = api_key
         llm = ChatOpenAI(temperature=0, model="gpt-4o-mini").bind(response_format={"type": "json_object"})
-        print("Using gpt-4o-mini")
+        flush_print("Using gpt-4o-mini")
 
         return llm
 
@@ -28,38 +39,16 @@ def get_llm(llm_model, api_key):
             format="json",
             temperature=0)
 
-        print("Using gemma2")
+        flush_print("Using gemma2")
         return llm
 
     
     # cannot work now, need langchain fix error
-    if "gemini" in llm_model.lower():
-        print("langchain not support gemini")
+    if "google" in llm_model.lower():
+        return None
 
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash-exp", 
-            google_api_key=api_key,
-            format="json"
-            )
-        print("Using gemini-2.0-flash-exp")
-        
-        # Define a Pydantic model for structured output
-        class JsonOutput(BaseModel):
-            """Json response output."""
-            output: dict = Field(description="reply:content")
+    flush_print("no suport LLM")
 
-        # Bind the llm to structured output
-        llm = llm.with_structured_output(JsonOutput)
-        return llm
-
-
-# Clip the history to the last 16000 characters
-def clip_history(history: str, max_chars: int = 32000) -> str:
-    if len(history) > max_chars:
-        return history[-max_chars:]
-    return history
 
 def ChatBot(llm, question):
     # Define the prompt template
@@ -92,3 +81,53 @@ def create_llm_chain(prompt_template: str, llm, history: str) -> str:
     generation = llm_chain.invoke(inputs)
 
     return generation
+
+def create_llm_chain_google(prompt_template: str, llm, history: Optional[str] = None) -> str:
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    # If history exists, include it in the prompt
+    full_prompt = f"{history}\n{prompt_template}, you reply in json file" if history else prompt_template
+    
+    data = {
+        "contents": [{
+            "parts": [{"text": full_prompt}]
+        }]
+    }
+    
+    params = {
+        "key": "your google key"
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=data, params=params)
+        response.raise_for_status()
+        
+        json_response = response.json()
+        
+        # Extract the text from candidates[0].content.parts[0].text
+        if (json_response.get("candidates") and 
+            len(json_response["candidates"]) > 0 and 
+            json_response["candidates"][0].get("content") and 
+            json_response["candidates"][0]["content"].get("parts") and 
+            len(json_response["candidates"][0]["content"]["parts"]) > 0):
+            
+            output = json_response["candidates"][0]["content"]["parts"][0]["text"]
+        else:
+            raise ValueError("Unexpected response structure from Gemini API")
+            
+        output = str(output)
+        output = output[7:-3]
+        output = json.dumps({"output": output})
+        flush_print("printing:")        
+        flush_print(output)
+
+        return output
+
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"API request failed: {str(e)}")
+    except ValueError as e:
+        raise Exception(f"Error processing response: {str(e)}")

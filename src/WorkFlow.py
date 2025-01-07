@@ -1,19 +1,16 @@
 # WorkFlow.py
 import os
-import sys
 import re
 import json
 from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal
 import operator
 import inspect
 
-from NodeData import NodeData
 from langgraph.graph import StateGraph, END, START
-from llm import get_llm, clip_history, create_llm_chain
 
-def flush_print(*args, **kwargs):
-    print(*args, **kwargs)
-    sys.stdout.flush()
+from NodeData import NodeData
+from llm import get_llm, clip_history, create_llm_chain
+from util import flush_print
 
 # Tool registry to hold information about tools
 tool_registry: Dict[str, Callable] = {}
