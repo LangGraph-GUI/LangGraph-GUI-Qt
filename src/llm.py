@@ -1,13 +1,12 @@
 # llm.py
 
 import os
-
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-
 import json
 
 from pydantic import BaseModel, Field
+
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 def get_llm(llm_model, api_key):
 
@@ -81,3 +80,15 @@ def ChatBot(llm, question):
     reply = data.get("reply", "")
 
     return reply
+
+
+def create_llm_chain(prompt_template: str, llm, history: str) -> str:
+    """
+    Creates and invokes an LLM chain using the prompt template and the history.
+    """
+    prompt = PromptTemplate.from_template(prompt_template)
+    llm_chain = prompt | llm | StrOutputParser()
+    inputs = {"history": history}
+    generation = llm_chain.invoke(inputs)
+
+    return generation

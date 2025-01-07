@@ -1,5 +1,4 @@
 # WorkFlow.py
-
 import os
 import sys
 import re
@@ -9,10 +8,8 @@ import operator
 import inspect
 
 from NodeData import NodeData
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 from langgraph.graph import StateGraph, END, START
-from llm import get_llm, clip_history
+from llm import get_llm, clip_history, create_llm_chain
 
 def flush_print(*args, **kwargs):
     print(*args, **kwargs)
@@ -53,11 +50,8 @@ class PipelineState(TypedDict):
 def execute_step(name:str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
     flush_print(f"{name} is working...")
     state["history"] = clip_history(state["history"])
-    
-    prompt = PromptTemplate.from_template(prompt_template)
-    llm_chain = prompt | llm | StrOutputParser()
-    inputs = {"history": state["history"]}
-    generation = llm_chain.invoke(inputs)
+
+    generation = create_llm_chain(prompt_template, llm, state["history"])
     data = json.loads(generation)
     
     state["history"] += "\n" + json.dumps(data)
@@ -71,10 +65,7 @@ def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> 
 
     state["history"] = clip_history(state["history"])
     
-    prompt = PromptTemplate.from_template(prompt_template)
-    llm_chain = prompt | llm | StrOutputParser()
-    inputs = {"history": state["history"]}
-    generation = llm_chain.invoke(inputs)
+    generation = create_llm_chain(prompt_template, llm, state["history"])
 
     # Sanitize the generation output by removing invalid control characters
     sanitized_generation = re.sub(r'[\x00-\x1F\x7F]', '', generation)
@@ -107,12 +98,8 @@ def condition_switch(name:str, state: PipelineState, prompt_template: str, llm) 
     flush_print(f"{name} is working...")
 
     state["history"] = clip_history(state["history"])
-    
-    prompt = PromptTemplate.from_template(prompt_template)
-    llm_chain = prompt | llm | StrOutputParser()
-    inputs = {"history": state["history"]}
-    generation = llm_chain.invoke(inputs)
 
+    generation = create_llm_chain(prompt_template, llm, state["history"])
     data = json.loads(generation)
     
     condition = data["switch"]
@@ -123,7 +110,7 @@ def condition_switch(name:str, state: PipelineState, prompt_template: str, llm) 
 
     return state
 
-def info_add(name: str, state: PipelineState, information: str, llm) -> PipelineState:   
+def info_add(name: str, state: PipelineState, information: str, llm) -> PipelineState:
     flush_print(f"{name} is adding information...")
 
     # Append the provided information to the history
