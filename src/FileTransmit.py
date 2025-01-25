@@ -79,25 +79,6 @@ async def upload_file(username: str, files: List[UploadFile] = File(...)):
     
     return JSONResponse(content={"message": "Files successfully uploaded"}, status_code=200)
 
-# Route to handle saving graph data as JSON with username
-@file_router.post('/save-graph/{username}')
-async def save_graph(username: str, graph_data: dict):
-    try:
-        # Get or create the user's workspace
-        user_workspace = get_or_create_workspace(username)
-
-        # Save the JSON data to a file in the user's workspace
-        graph_file_path = os.path.join(user_workspace, 'graph.json')
-        with open(graph_file_path, 'w') as graph_file:
-            json.dump(graph_data, graph_file, indent=2)
-
-        print(f"Graph data saved to {graph_file_path}")
-        return JSONResponse(content={"message": "Graph data successfully saved"}, status_code=200)
-
-    except Exception as e:
-        print(f"Error saving graph data: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to save graph data: {str(e)}")
-
 # Route to handle cleaning the user's workspace
 @file_router.post('/clean-cache/{username}')
 async def clean_cache(username: str):
