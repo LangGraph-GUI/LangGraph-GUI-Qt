@@ -1,8 +1,9 @@
 # WorkFlow.py
+
 import os
 import re
 import json
-from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal
+from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal, Optional
 import operator
 import inspect
 
@@ -25,14 +26,20 @@ def tool(func: Callable) -> Callable:
     tool_info_registry[func.__name__] = tool_info
     return func
 
-def load_nodes_from_json(filename: str) -> Dict[str, NodeData]:
-    with open(filename, 'r') as file:
-        data = json.load(file)
-        node_map = {}
-        for node_data in data["nodes"]:
-            node = NodeData.from_dict(node_data)
-            node_map[node.uniq_id] = node
-        return node_map
+def parse_nodes_from_json(graph_data: Dict[str, Any]) -> Dict[str, NodeData]:
+    """
+    Parses node data from a subgraph's JSON structure.
+
+    Args:
+        graph_data: A dictionary representing a subgraph.
+    Returns:
+        A dictionary of NodeData objects keyed by their unique IDs.
+    """
+    node_map = {}
+    for node_data in graph_data.get("nodes", []):
+        node = NodeData.from_dict(node_data)
+        node_map[node.uniq_id] = node
+    return node_map
 
 def find_nodes_by_type(node_map: Dict[str, NodeData], node_type: str) -> List[NodeData]:
     return [node for node in node_map.values() if node.type == node_type]
@@ -220,11 +227,22 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         flush_print(state)
 
 def run_workflow_as_server(llm):
-    node_map = load_nodes_from_json("graph.json")
+    # Load subgraph data
+    with open("graph.json", 'r') as file:
+        graphs = json.load(file)
 
-    # Register the tool functions dynamically
-    for tool in find_nodes_by_type(node_map, "TOOL"):
-        tool_code = f"{tool.description}"
-        exec(tool_code, globals())
+    # Process each subgraph
+    for graph in graphs:
+        subgraph_name = graph.get("name")        
 
-    RunWorkFlow(node_map, llm)
+        if subgraph_name == "root":
+            node_map = parse_nodes_from_json(graph)
+
+            # Register the tool functions dynamically
+            for tool in find_nodes_by_type(node_map, "TOOL"):
+                tool_code = f"{tool.description}"
+                exec(tool_code, globals())
+
+            RunWorkFlow(node_map, llm)
+        else:
+            print(f"Skipping subgraph: {subgraph_name}") # Optional logging
