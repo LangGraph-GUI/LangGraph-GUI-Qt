@@ -3,7 +3,7 @@
 import os
 import re
 import json
-from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal, Optional
+from typing import Dict, List, TypedDict, Any, Annotated, Callable, Literal, Optional, Union
 import operator
 import inspect
 
@@ -16,6 +16,9 @@ from util import flush_print
 # Tool registry to hold information about tools
 tool_registry: Dict[str, Callable] = {}
 tool_info_registry: Dict[str, str] = {}
+
+# Subgraph registry to hold all the subgraph
+subgraph_registry: Dict[str, Any] = {}
 
 # Decorator to register tools
 def tool(func: Callable) -> Callable:
@@ -45,7 +48,6 @@ def find_nodes_by_type(node_map: Dict[str, NodeData], node_type: str) -> List[No
     return [node for node in node_map.values() if node.type == node_type]
 
 
-
 class PipelineState(TypedDict):
     history: Annotated[str, operator.add]
     task: Annotated[str, operator.add]
@@ -61,6 +63,7 @@ def execute_step(name:str, state: PipelineState, prompt_template: str, llm) -> P
     state["history"] += "\n" + json.dumps(data)
     state["history"] = clip_history(state["history"])
 
+    flush_print(state["history"])
     return state
 
 def execute_tool(name: str, state: PipelineState, prompt_template: str, llm) -> PipelineState:
@@ -129,9 +132,9 @@ def conditional_edge(state: PipelineState) -> Literal["True", "False"]:
     else:
         return "False"
 
-def RunWorkFlow(node_map: Dict[str, NodeData], llm):
+def build_subgraph(node_map: Dict[str, NodeData], llm) -> StateGraph:
     # Define the state machine
-    workflow = StateGraph(PipelineState)
+    subgraph = StateGraph(PipelineState)
 
     # Start node, only one start point
     start_node = find_nodes_by_type(node_map, "START")[0]
@@ -151,7 +154,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
 
             next stage directly parse then run <func_name>(<arg1>,<arg2>, ...) make sure syntax is right json and align function siganture
             """
-            workflow.add_node(
+            subgraph.add_node(
                 current_node.uniq_id, 
                 lambda state, template=prompt_template, llm=llm, name=current_node.name : execute_tool(name, state, template, llm)
             )
@@ -161,7 +164,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
             {current_node.description}
             you reply in the json format
             """
-            workflow.add_node(
+            subgraph.add_node(
                 current_node.uniq_id, 
                 lambda state, template=prompt_template, llm=llm, name=current_node.name: execute_step(name, state, template, llm)
             )
@@ -170,7 +173,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     info_nodes = find_nodes_by_type(node_map, "INFO")
     for info_node in info_nodes:
         # INFO nodes just append predefined information to the state history
-        workflow.add_node(
+        subgraph.add_node(
             info_node.uniq_id, 
             lambda state, template=info_node.description, llm=llm, name=info_node.name: info_add(name, state, template, llm)
         )
@@ -182,7 +185,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
     
     for next_node in next_nodes:
         flush_print(f"Next node ID: {next_node.uniq_id}, Type: {next_node.type}")
-        workflow.add_edge(START, next_node.uniq_id)   
+        subgraph.add_edge(START, next_node.uniq_id)   
 
     # Find all next nodes from step_nodes
     for node in step_nodes + info_nodes:
@@ -190,7 +193,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         
         for next_node in next_nodes:
             flush_print(f"{node.name} {node.uniq_id}'s next node: {next_node.name} {next_node.uniq_id}, Type: {next_node.type}")
-            workflow.add_edge(node.uniq_id, next_node.uniq_id)
+            subgraph.add_edge(node.uniq_id, next_node.uniq_id)
 
     # Find all condition nodes
     condition_nodes = find_nodes_by_type(node_map, "CONDITION")
@@ -199,7 +202,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         history: {{history}}, decide the condition result in the json format:
         "switch": True/False
         """
-        workflow.add_node(
+        subgraph.add_node(
             condition.uniq_id, 
             lambda state, template=condition_template, llm=llm, name=condition.name: condition_switch(name, state, template, llm)
         )
@@ -207,7 +210,7 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
         flush_print(f"{condition.name} {condition.uniq_id}'s condition")
         flush_print(f"true will go {condition.true_next}")
         flush_print(f"false will go {condition.false_next}")
-        workflow.add_conditional_edges(
+        subgraph.add_conditional_edges(
             condition.uniq_id,
             conditional_edge,
             {
@@ -215,34 +218,57 @@ def RunWorkFlow(node_map: Dict[str, NodeData], llm):
                 "False": condition.false_next if condition.false_next else END
             }
         )
+    return subgraph.compile()
 
-    initial_state = PipelineState(
-        history="",
-        task="",
-        condition=False
+
+class MainGraphState(TypedDict):
+    input: Union[str, None]
+
+def invoke_root(state: MainGraphState):
+    subgraph = subgraph_registry["root"]
+    response = subgraph.invoke(
+        PipelineState(
+            history="",
+            task="",
+            condition=False
+        )
     )
+    return  {"input": None}
 
-    app = workflow.compile()
-    for state in app.stream(initial_state):
-        flush_print(state)
 
 def run_workflow_as_server(llm):
     # Load subgraph data
     with open("graph.json", 'r') as file:
         graphs = json.load(file)
-
+    
     # Process each subgraph
     for graph in graphs:
         subgraph_name = graph.get("name")        
+        node_map = parse_nodes_from_json(graph)
+        
+        # Register the tool functions dynamically if has tool node, must before build graph
+        for tool_node in find_nodes_by_type(node_map, "TOOL"):
+            tool_code = f"{tool_node.description}"
+            exec(tool_code, globals())
 
-        if subgraph_name == "root":
-            node_map = parse_nodes_from_json(graph)
+        
+        subgraph = build_subgraph(node_map, llm)
+        subgraph_registry[subgraph_name] = subgraph
 
-            # Register the tool functions dynamically
-            for tool in find_nodes_by_type(node_map, "TOOL"):
-                tool_code = f"{tool.description}"
-                exec(tool_code, globals())
+    
+    # Main Graph
+    main_graph = StateGraph(MainGraphState)
+    main_graph.add_node("subgraph", invoke_root)
+    main_graph.set_entry_point("subgraph")
+    main_graph = main_graph.compile()
 
-            RunWorkFlow(node_map, llm)
-        else:
-            print(f"Skipping subgraph: {subgraph_name}") # Optional logging
+
+    # ==========================
+    # Run
+    # ==========================
+    for state in main_graph.stream(
+        {
+            "input": None,
+        }
+    ):
+        flush_print(state)
