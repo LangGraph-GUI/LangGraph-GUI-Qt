@@ -126,6 +126,23 @@ def info_add(name: str, state: PipelineState, information: str, llm) -> Pipeline
 
     return state
 
+
+def sg_add(name:str, state: PipelineState, sg_name: str) -> PipelineState:
+    flush_print(f"{name} is working, it is a subgraph node call {sg_name} ...")
+    subgraph = subgraph_registry[sg_name]
+    response = subgraph.invoke(
+        PipelineState(
+            history=state["history"],
+            task=state["task"],
+            condition=state["condition"]
+        )
+    )
+    state["history"] = response["history"]
+    state["task"] = response["task"]
+    state["condition"] = response["condition"]
+    return state
+
+
 def conditional_edge(state: PipelineState) -> Literal["True", "False"]:
     if state["condition"] in ["True", "true", True]:
         return "True"
@@ -177,6 +194,14 @@ def build_subgraph(node_map: Dict[str, NodeData], llm) -> StateGraph:
             info_node.uniq_id, 
             lambda state, template=info_node.description, llm=llm, name=info_node.name: info_add(name, state, template, llm)
         )
+    
+    # Add SUBGRAPH nodes
+    subgraph_nodes = find_nodes_by_type(node_map, "SUBGRAPH")
+    for sg_node in subgraph_nodes:
+        subgraph.add_node(
+            sg_node.uniq_id, 
+            lambda state, llm=llm, name=sg_node.name, sg_name=sg_node.name: sg_add(name, state, sg_name)
+        )
 
     # Edges
     # Find all next nodes from start_node
@@ -188,7 +213,7 @@ def build_subgraph(node_map: Dict[str, NodeData], llm) -> StateGraph:
         subgraph.add_edge(START, next_node.uniq_id)   
 
     # Find all next nodes from step_nodes
-    for node in step_nodes + info_nodes:
+    for node in step_nodes + info_nodes + subgraph_nodes:
         next_nodes = [node_map[next_id] for next_id in node.nexts]
         
         for next_node in next_nodes:
